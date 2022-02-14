@@ -9,9 +9,7 @@ endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 14)
 
-option(BUILD_WELLE_IO    "Build Welle.io"                        ON  )
 option(BUILD_WELLE_CLI   "Build welle-cli"                       ON  )
-option(WITH_APP_BUNDLE   "Enable Application Bundle for macOS"   ON  )
 option(KISS_FFT          "KISS FFT instead of FFTW"              OFF )
 option(PROFILING         "Enable profiling (see README.md)"      OFF )
 option(AIRSPY            "Compile with Airspy support"           OFF )
@@ -22,9 +20,6 @@ add_definitions(-Wall)
 add_definitions(-g)
 add_definitions(-DDABLIN_AAC_FAAD2)
 
-if(MINGW)
-    add_definitions(-municode)
-endif()
 
 if(NOT CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE "Release")
@@ -36,24 +31,9 @@ set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "")
 
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
-if(APPLE AND WITH_APP_BUNDLE)
-    if(NOT DEFINED BUNDLE_INSTALL_DIR)
-        set(BUNDLE_INSTALL_DIR "/Applications")
-    endif()
+include(GNUInstallDirs)
 
-    set(GUI_INSTALL_DIR "${BUNDLE_INSTALL_DIR}")
-else()
-    include(GNUInstallDirs)
-
-    set(GUI_INSTALL_DIR "${CMAKE_INSTALL_BINDIR}")
-endif()
-
-if(BUILD_WELLE_IO)
-    set(CMAKE_AUTOMOC ON)
-    set(CMAKE_AUTORCC ON)
-
-    find_package(Qt5 COMPONENTS Widgets Quick QuickControls2 Multimedia Charts Qml DBus REQUIRED)
-endif()
+set(GUI_INSTALL_DIR "${CMAKE_INSTALL_BINDIR}")
 
 if(PROFILING)
     add_definitions(-DWITH_PROFILING)
@@ -102,7 +82,6 @@ include_directories(
     src/output
     src/various
     src/input
-    src/gui
     src/libs/fec
     ${FFTW3F_INCLUDE_DIRS}
     ${KISS_INCLUDE_DIRS}
@@ -144,19 +123,6 @@ set(backend_sources
     src/libs/fec/decode_rs_char.c
     src/libs/fec/encode_rs_char.c
     src/libs/fec/init_rs_char.c
-)
-
-set(welle_io_sources
-    src/welle-gui/main.cpp
-    src/welle-gui/audio_output.cpp
-    src/welle-gui/mot_image_provider.cpp
-    src/welle-gui/gui_helper.cpp
-    src/welle-gui/radio_controller.cpp
-    src/welle-gui/mpris/mpris.cpp
-    src/welle-gui/mpris/mpris_mp2.cpp
-    src/welle-gui/mpris/mpris_mp2_player.cpp
-    src/welle-gui/debug_output.cpp
-    src/welle-gui/waterfallitem.cpp
 )
 
 set(welle_cli_sources
@@ -219,54 +185,6 @@ endif()
 STRING(TIMESTAMP BUILD_DATE "%s" UTC)
 add_definitions("-DBUILD_DATE=\"${BUILD_DATE}\"")
 
-if(BUILD_WELLE_IO)
-    set(executableName welle-io)
-    add_executable (${executableName} ${welle_io_sources} ${backend_sources} ${input_sources} ${fft_sources} ${EXTRA_MOCS} src/welle-gui/resources.qrc)
-
-    target_link_libraries (${executableName}
-      ${LIBRTLSDR_LIBRARIES}
-      ${LIBAIRSPY_LIBRARIES}
-      ${FFTW3F_LIBRARIES}
-      ${FAAD_LIBRARIES}
-      ${SoapySDR_LIBRARIES}
-      ${MPG123_LIBRARIES}
-      Threads::Threads
-      Qt5::Core Qt5::Widgets Qt5::Multimedia Qt5::Charts Qt5::Qml Qt5::Quick Qt5::QuickControls2 Qt5::DBus
-    )
-
-    if(APPLE AND WITH_APP_BUNDLE)
-        set(macOsIcon ${CMAKE_CURRENT_SOURCE_DIR}/src/welle-gui/icons/icon.icns)
-        set_source_files_properties(${macOsIcon} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-        target_sources(${executableName} PRIVATE ${macOsIcon})
-
-        set(SHORT_VERSION "${WELLE-IO_VERSION}")
-        set(EXECUTABLE "${executableName}")
-        set(TYPEINFO "io.welle.welle")
-        set(PRODUCT_BUNDLE_IDENTIFIER "io.welle.welle")
-
-        set_target_properties("${executableName}" PROPERTIES
-            MACOSX_BUNDLE TRUE
-            MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/welle-io.plist
-        )
-
-        INSTALL (TARGETS ${executableName} BUNDLE DESTINATION ${GUI_INSTALL_DIR})
-    else()
-        INSTALL (TARGETS ${executableName} RUNTIME DESTINATION ${GUI_INSTALL_DIR})
-        INSTALL (FILES src/welle-gui/doc/man/welle-io.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1/)
-
-        if(UNIX AND NOT APPLE)
-            INSTALL (FILES ${PROJECT_SOURCE_DIR}/welle-io.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
-
-            INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icons/16x16/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/16x16/apps)
-            INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icons/24x24/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/24x24/apps)
-            INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icons/32x32/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/32x32/apps)
-            INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icons/48x48/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/48x48/apps)
-            INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icons/128x128/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/128x128/apps)
-            INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icons/256x256/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/256x256/apps)
-        endif()
-    endif()
-endif()
-
 if(BUILD_WELLE_CLI)
     set(cliExecutableName welle-cli)
     add_executable (${cliExecutableName} ${welle_cli_sources} ${backend_sources} ${input_sources} ${fft_sources})
@@ -299,15 +217,6 @@ if(BUILD_WELLE_CLI)
                     ${CMAKE_SOURCE_DIR}/src/welle-cli/index.js
                     ${CMAKE_CURRENT_BINARY_DIR}/index.js)
 
-    if(APPLE AND WITH_APP_BUNDLE)
-        INSTALL (TARGETS ${cliExecutableName} RUNTIME DESTINATION ${GUI_INSTALL_DIR}/${executableName}.app/Contents/MacOS)
-        INSTALL (
-            FILES
-                ${PROJECT_SOURCE_DIR}/src/welle-cli/index.html
-                ${PROJECT_SOURCE_DIR}/src/welle-cli/index.js
-            DESTINATION ${GUI_INSTALL_DIR}/${executableName}.app/Contents/Resources/welle-cli
-        )
-    elseif(UNIX)
         INSTALL (TARGETS ${cliExecutableName} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
         INSTALL (FILES src/welle-cli/doc/man/welle-cli.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1/)
         INSTALL (
@@ -316,7 +225,6 @@ if(BUILD_WELLE_CLI)
                 ${PROJECT_SOURCE_DIR}/src/welle-cli/index.js
             DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/welle-io/html/
         )
-    endif()
 endif()
 
 configure_file(
