@@ -130,13 +130,15 @@ static bool send_http_response(Socket& s, const string& statuscode,
 
 WebRadioInterface::WebRadioInterface(CVirtualInput& in,
         int port,
+        string url,
         DecodeSettings ds,
         RadioReceiverOptions rro) :
     dabparams(1),
     input(in),
     spectrum_fft_handler(dabparams.T_u),
     rro(rro),
-    decode_settings(ds)
+    decode_settings(ds),
+    serverUrl(url)
 {
     {
         // Ensure that rx always exists when rx_mut is free!
@@ -827,7 +829,7 @@ bool WebRadioInterface::send_mux_playlist(Socket& s)
 
             if (not url_mp3.empty()) {
                 m3u << "#EXTINF:-1 sid=\"" << hex_sid << "\"," << label << "\n";
-                m3u << url_mp3 << "\n";
+                m3u << serverUrl << url_mp3 << "\n";
             }
         }
     }

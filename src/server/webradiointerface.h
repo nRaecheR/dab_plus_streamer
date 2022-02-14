@@ -74,6 +74,7 @@ class WebRadioInterface : public RadioControllerInterface {
         WebRadioInterface(
                 CVirtualInput& in,
                 int port,
+				std::string url,
                 DecodeSettings cs,
                 RadioReceiverOptions rro);
         ~WebRadioInterface();
@@ -195,6 +196,7 @@ class WebRadioInterface : public RadioControllerInterface {
         std::map<comb_pattern_t, std::list<tii_measurement_t> > tiis;
 
         Socket serverSocket;
+        std::string serverUrl;
 
         mutable std::mutex rx_mut;
         std::chrono::time_point<std::chrono::system_clock> time_rx_created;

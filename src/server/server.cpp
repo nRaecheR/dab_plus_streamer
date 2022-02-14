@@ -285,6 +285,7 @@ struct options_t {
     bool decode_all_programmes = false;
     int num_decoders_in_carousel = 0;
     bool carousel_pad = false;
+    string web_url = "";
     int web_port = -1; // positive value means enable
     list<int> tests;
 
@@ -320,6 +321,9 @@ static void usage()
     "                  With the -P option, welle-cli will switch once DLS and a" << endl <<
     "                  slide were decoded, staying at most 80 seconds on a given" << endl <<
     "                  programme." << endl <<
+    "    -U url        The url where the dab plus server is accessible from." << endl <<
+    "                  A hostname with the port should be given here, it will be used" << endl <<
+    "                  as the prefix-URL for the M3U playlist." << endl <<
     endl <<
     "Backend and input options:" << endl <<
     "    -f file       Read an IQ file <file> and play with ALSA." << endl <<
@@ -404,7 +408,7 @@ options_t parse_cmdline(int argc, char **argv)
     options.rro.decodeTII = true;
 
     int opt;
-    while ((opt = getopt(argc, argv, "A:c:C:dDf:F:g:hp:Ps:Tt:uvw:")) != -1) {
+    while ((opt = getopt(argc, argv, "A:c:C:dDf:F:g:hp:Ps:Tt:uU:vw:")) != -1) {
         switch (opt) {
             case 'A':
                 options.antenna = optarg;
@@ -456,6 +460,9 @@ options_t parse_cmdline(int argc, char **argv)
             case 'w':
                 options.web_port = std::atoi(optarg);
                 break;
+			case 'U':
+				options.web_url = optarg;
+				break;
             case 'u':
                 options.rro.disableCoarseCorrector = true;
                 break;
@@ -576,7 +583,7 @@ int main(int argc, char **argv)
             }
             ds.num_decoders_in_carousel = options.num_decoders_in_carousel;
         }
-        WebRadioInterface wri(*in, options.web_port, ds, options.rro);
+        WebRadioInterface wri(*in, options.web_port, options.web_url, ds, options.rro);
         wri.serve();
     }
     else {
