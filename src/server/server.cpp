@@ -46,10 +46,10 @@
 #endif
 #include "rtl_tcp.h"
 #if defined(HAVE_ALSA)
-#  include "welle-cli/alsa-output.h"
+#  include "server/alsa-output.h"
 #endif
-#include "welle-cli/webradiointerface.h"
-#include "welle-cli/tests.h"
+#include "server/webradiointerface.h"
+#include "server/tests.h"
 #include "backend/radio-receiver.h"
 #include "input/input_factory.h"
 #include "input/raw_file.h"
@@ -294,10 +294,8 @@ struct options_t {
 static void usage()
 {
     cerr <<
-    "Usage: welle-cli [OPTION]" << endl <<
-    "   or: welle-cli -w <port> [OPTION]" << endl <<
-    endl <<
-    "welle-cli is welle.io's command line interface." << endl <<
+    "Usage: dab_plus_streamer [OPTION]" << endl <<
+    "   or: dab_plus_streamer -w <port> [OPTION]" << endl <<
     endl <<
     "Options:" << endl <<
     endl <<
@@ -386,18 +384,17 @@ static void usage()
 static void copyright()
 {
     cerr <<
-    "Copyright (C) 2018 Matthias P. Braendli." << endl <<
-    "Copyright (C) 2017 Albrecht Lohofener." << endl <<
+    "Copyright (C) 2022 Arne Bockholdt." << endl <<
     "License GPL-2.0-or-later: GNU General Public License v2.0 or later" << endl <<
     "<https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html>" << endl <<
     endl <<
-    "Written by: Albrecht Lohofener & Matthias P. Braendli." << endl <<
-    "Other contributors: <https://github.com/AlbrechtL/welle.io/blob/master/AUTHORS>" << endl;
+    "Written by: Arne Bockholdt" << endl <<
+    "Other contributors: <https://github.com/nRaecheR/dab_plus_streamer/blob/master/AUTHORS>" << endl;
 }
 
 static void version()
 {
-    cerr << "welle-cli " << VERSION << endl;
+    cerr << "dab_plus_streamer " << VERSION << endl;
 }
 
 options_t parse_cmdline(int argc, char **argv)

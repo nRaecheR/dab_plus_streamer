@@ -26,7 +26,7 @@
 #if defined(HAVE_ALSA)
 
 #include <thread>
-#include "welle-cli/alsa-output.h"
+#include "server/alsa-output.h"
 
 using namespace std;
 #define PCM_DEVICE "default"

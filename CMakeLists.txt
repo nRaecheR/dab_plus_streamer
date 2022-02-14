@@ -1,15 +1,14 @@
 cmake_minimum_required(VERSION 3.2)
 
-project(Welle.Io VERSION 0.0.0 LANGUAGES C CXX)
+project(Dab-Plus-Streamer VERSION 0.0.0 LANGUAGES C CXX)
 
-if(NOT WELLE-IO_VERSION)
-  set(WELLE-IO_VERSION ${PROJECT_VERSION})
+if(NOT DAB-PLUS-STREAMER_VERSION)
+  set(DAB-PLUS-STREAMER_VERSION ${PROJECT_VERSION})
 endif()
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 14)
 
-option(BUILD_WELLE_CLI   "Build welle-cli"                       ON  )
 option(KISS_FFT          "KISS FFT instead of FFTW"              OFF )
 option(PROFILING         "Enable profiling (see README.md)"      OFF )
 option(AIRSPY            "Compile with Airspy support"           OFF )
@@ -54,10 +53,7 @@ else()
     set(KISS_INCLUDE_DIRS "")
 endif()
 
-if(BUILD_WELLE_CLI)
-    find_package(Lame REQUIRED)
-endif()
-
+find_package(Lame REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Faad REQUIRED)
 find_package(MPG123 REQUIRED)
@@ -125,13 +121,13 @@ set(backend_sources
     src/libs/fec/init_rs_char.c
 )
 
-set(welle_cli_sources
-    src/welle-cli/welle-cli.cpp
-    src/welle-cli/alsa-output.cpp
-    src/welle-cli/webradiointerface.cpp
-    src/welle-cli/jsonconvert.cpp
-    src/welle-cli/webprogrammehandler.cpp
-    src/welle-cli/tests.cpp
+set(server_sources
+    src/server/server.cpp
+    src/server/alsa-output.cpp
+    src/server/webradiointerface.cpp
+    src/server/jsonconvert.cpp
+    src/server/webprogrammehandler.cpp
+    src/server/tests.cpp
 )
 
 set(input_sources
@@ -185,47 +181,46 @@ endif()
 STRING(TIMESTAMP BUILD_DATE "%s" UTC)
 add_definitions("-DBUILD_DATE=\"${BUILD_DATE}\"")
 
-if(BUILD_WELLE_CLI)
-    set(cliExecutableName welle-cli)
-    add_executable (${cliExecutableName} ${welle_cli_sources} ${backend_sources} ${input_sources} ${fft_sources})
 
-    if(CMAKE_BUILD_TYPE MATCHES Debug)
-      SET_TARGET_PROPERTIES(${cliExecutableName} PROPERTIES COMPILE_FLAGS "-O2 -fno-omit-frame-pointer -fsanitize=address")
-      SET_TARGET_PROPERTIES(${cliExecutableName} PROPERTIES LINK_FLAGS "-fno-omit-frame-pointer -fsanitize=address")
-    endif(CMAKE_BUILD_TYPE MATCHES Debug)
+set(ExecutableName dab_plus_streamer)
+add_executable (${ExecutableName} ${server_sources} ${backend_sources} ${input_sources} ${fft_sources})
 
-    target_link_libraries (${cliExecutableName}
-      ${LIBRTLSDR_LIBRARIES}
-      ${LIBAIRSPY_LIBRARIES}
-      ${FFTW3F_LIBRARIES}
-      ${FAAD_LIBRARIES}
-      ${ALSA_LIBRARIES}
-      ${LAME_LIBRARIES}
-      ${SoapySDR_LIBRARIES}
-      ${MPG123_LIBRARIES}
-      Threads::Threads
-    )
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  SET_TARGET_PROPERTIES(${ExecutableName} PROPERTIES COMPILE_FLAGS "-O2 -fno-omit-frame-pointer -fsanitize=address")
+  SET_TARGET_PROPERTIES(${ExecutableName} PROPERTIES LINK_FLAGS "-fno-omit-frame-pointer -fsanitize=address")
+endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
-    add_custom_command(
-            TARGET ${cliExecutableName} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy
-                    ${CMAKE_SOURCE_DIR}/src/welle-cli/index.html
-                    ${CMAKE_CURRENT_BINARY_DIR}/index.html)
-    add_custom_command(
-            TARGET ${cliExecutableName} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy
-                    ${CMAKE_SOURCE_DIR}/src/welle-cli/index.js
-                    ${CMAKE_CURRENT_BINARY_DIR}/index.js)
+target_link_libraries (${ExecutableName}
+  ${LIBRTLSDR_LIBRARIES}
+  ${LIBAIRSPY_LIBRARIES}
+  ${FFTW3F_LIBRARIES}
+  ${FAAD_LIBRARIES}
+  ${ALSA_LIBRARIES}
+  ${LAME_LIBRARIES}
+  ${SoapySDR_LIBRARIES}
+  ${MPG123_LIBRARIES}
+  Threads::Threads
+)
 
-        INSTALL (TARGETS ${cliExecutableName} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-        INSTALL (FILES src/welle-cli/doc/man/welle-cli.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1/)
-        INSTALL (
-            FILES
-                ${PROJECT_SOURCE_DIR}/src/welle-cli/index.html
-                ${PROJECT_SOURCE_DIR}/src/welle-cli/index.js
-            DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/welle-io/html/
-        )
-endif()
+add_custom_command(
+		TARGET ${ExecutableName} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy
+				${CMAKE_SOURCE_DIR}/src/server/index.html
+				${CMAKE_CURRENT_BINARY_DIR}/index.html)
+add_custom_command(
+		TARGET ${ExecutableName} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy
+				${CMAKE_SOURCE_DIR}/src/server/index.js
+				${CMAKE_CURRENT_BINARY_DIR}/index.js)
+
+	INSTALL (TARGETS ${ExecutableName} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+	INSTALL (FILES src/server/doc/man/dab-plus-streamer.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1/)
+	INSTALL (
+		FILES
+			${PROJECT_SOURCE_DIR}/src/server/index.html
+			${PROJECT_SOURCE_DIR}/src/server/index.js
+		DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/server/html/
+	)
 
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"

@@ -23,7 +23,7 @@
  *
  */
 
-#include "welle-cli/webradiointerface.h"
+#include "server/webradiointerface.h"
 #include <algorithm>
 #include <cmath>
 #include <complex>
@@ -53,8 +53,8 @@
 #include "ofdm-decoder.h"
 #include "radio-receiver.h"
 #include "virtual_input.h"
-#include "welle-cli/jsonconvert.h"
-#include "welle-cli/webprogrammehandler.h"
+#include "server/jsonconvert.h"
+#include "server/webprogrammehandler.h"
 
 #ifdef __unix__
 # include <unistd.h>

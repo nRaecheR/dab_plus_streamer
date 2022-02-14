@@ -23,7 +23,7 @@
  *
  */
 
-#include "welle-cli/jsonconvert.h"
+#include "server/jsonconvert.h"
 #include "libs/json.hpp"
 
 using namespace std;
