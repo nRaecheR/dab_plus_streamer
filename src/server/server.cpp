@@ -317,8 +317,8 @@ static void usage()
     "                  This is useful if your machine cannot decode all programmes" << endl <<
     "                  simultaneously, but you still want to get an overview of" << endl <<
     "                  the ensemble." << endl <<
-    "    -P            Without the -P option, welle-cli will switch every 10 seconds." << endl <<
-    "                  With the -P option, welle-cli will switch once DLS and a" << endl <<
+    "    -P            Without the -P option, dab_plus_streamer will switch every 10 seconds." << endl <<
+    "                  With the -P option, dab_plus_streamer will switch once DLS and a" << endl <<
     "                  slide were decoded, staying at most 80 seconds on a given" << endl <<
     "                  programme." << endl <<
     "    -U url        The url where the dab plus server is accessible from." << endl <<
@@ -350,39 +350,39 @@ static void usage()
     endl <<
     "Examples:" << endl <<
     endl <<
-    "welle-cli -c 10B -p GRRIF" << endl <<
+    "dab_plus_streamer -c 10B -p GRRIF" << endl <<
     "    Receive 'GRRIF' on channel '10B' using 'auto' driver, and play with ALSA." << endl <<
     endl <<
-    "welle-cli -f ./ofdm.iq -p GRRIF" << endl <<
+    "dab_plus_streamer -f ./ofdm.iq -p GRRIF" << endl <<
     "    Read IQ file './ofdm.iq' (in u8 format) and play programme 'GRIFF' with ALSA." << endl <<
     endl <<
-    "welle-cli -f ./ofdm.iq -t 1" << endl <<
+    "dab_plus_streamer -f ./ofdm.iq -t 1" << endl <<
     "    Read IQ file './ofdm.iq' (in u8 format), and run test 1." << endl <<
     endl <<
-    "welle-cli -c 10B -p GRRIF -F rtl_tcp,localhost:1234" << endl <<
+    "dab_plus_streamer -c 10B -p GRRIF -F rtl_tcp,localhost:1234" << endl <<
     "    Receive 'GRRIF' on channel '10B' using 'rtl_tcp' driver on localhost:1234," << endl <<
     "    and play with ALSA." << endl <<
     endl <<
-    "welle-cli -c 10B -D " << endl <<
+    "dab_plus_streamer -c 10B -D " << endl <<
     "    Dump FIC and all programmes of channel 10B to files." << endl <<
     endl <<
-    "welle-cli -c 10B -w 8000" << endl <<
+    "dab_plus_streamer -c 10B -w 8000" << endl <<
     "    Enable web server on port 8000, decode programmes on channel 10B on demand" << endl <<
     "    (http://localhost:8000)." << endl <<
     endl <<
-    "welle-cli -c 10B -Dw 8000" << endl <<
+    "dab_plus_streamer -c 10B -Dw 8000" << endl <<
     "    Enable web server on port 8000, decode all programmes on channel 10B." << endl <<
     endl <<
-    "welle-cli -c 10B -C 1 -w 8000" << endl <<
+    "dab_plus_streamer -c 10B -C 1 -w 8000" << endl <<
     "    Enable web server on port 8000, decode programmes one by one in a carousel" << endl <<
-    "    on channel 10B; welle-cli will switch every 10 seconds." << endl <<
+    "    on channel 10B; dab_plus_streamer will switch every 10 seconds." << endl <<
     endl <<
-    "welle-cli -c 10B -PC 1 -w 8000" << endl <<
+    "dab_plus_streamer -c 10B -PC 1 -w 8000" << endl <<
     "    Enable web server on port 8000, decode programmes one by one in a carousel" << endl <<
-    "    on channel 10B; welle-cli will switch once DLS and a slide were decoded," << endl <<
+    "    on channel 10B; dab_plus_streamer will switch once DLS and a slide were decoded," << endl <<
     "    staying at most 80 seconds on a given programme." << endl <<
     endl <<
-    "Report bugs to: <https://github.com/AlbrechtL/welle.io/issues>" << endl;
+    "Report bugs to: <https://github.com/nRaecheR/dab_plus_streamer/issues>" << endl;
 }
 
 static void copyright()

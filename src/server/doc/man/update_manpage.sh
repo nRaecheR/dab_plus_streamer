@@ -6,5 +6,5 @@ help2man \
   --no-discard-stderr \
   --help-option='-h' \
   --version-option="-v" \
-  --output dab-plus-streamer.1 \
-  dab-plus-streamer
+  --output dab_plus_streamer.1 \
+  ../../../../build/dab_plus_streamer
