@@ -60,16 +60,16 @@
 #include "android_rtl_sdr.h"
 #endif
 
-CVirtualInput *CInputFactory::GetDevice(RadioControllerInterface& radioController, const std::string& device)
+CVirtualInput *CInputFactory::GetDevice(RadioControllerInterface& radioController, const std::string& device, const std::string options)
 {
     CVirtualInput *InputDevice = nullptr;
 
     std::clog << "InputFactory:" << "Input device:" << device << std::endl;
 
     if (device == "auto")
-        InputDevice = GetAutoDevice(radioController);
+        InputDevice = GetAutoDevice(radioController, options);
     else
-        InputDevice = GetManualDevice(radioController, device);
+        InputDevice = GetManualDevice(radioController, device, options);
 
     // Fallback if no device is found or an error occurred
     if (InputDevice == nullptr) {
@@ -87,7 +87,7 @@ CVirtualInput *CInputFactory::GetDevice(RadioControllerInterface& radioControlle
     return InputDevice;
 }
 
-CVirtualInput *CInputFactory::GetDevice(RadioControllerInterface &radioController, const CDeviceID deviceId)
+CVirtualInput *CInputFactory::GetDevice(RadioControllerInterface &radioController, const CDeviceID deviceId, const std::string options)
 {
     CVirtualInput *InputDevice = nullptr;
 
@@ -98,7 +98,7 @@ CVirtualInput *CInputFactory::GetDevice(RadioControllerInterface &radioControlle
 #endif
         case CDeviceID::RTL_TCP: InputDevice = new CRTL_TCP_Client(radioController); break;
 #ifdef HAVE_RTLSDR
-        case CDeviceID::RTL_SDR: InputDevice = new CRTL_SDR(radioController); break;
+        case CDeviceID::RTL_SDR: InputDevice = new CRTL_SDR(radioController, options); break;
 #endif
         case CDeviceID::RAWFILE: InputDevice = new CRAWFile(radioController); break;
 #ifdef HAVE_SOAPYSDR
@@ -129,7 +129,7 @@ CVirtualInput *CInputFactory::GetDevice(RadioControllerInterface &radioControlle
     return InputDevice;
 }
 
-CVirtualInput* CInputFactory::GetAutoDevice(RadioControllerInterface& radioController)
+CVirtualInput* CInputFactory::GetAutoDevice(RadioControllerInterface& radioController, const std::string options)
 {
     (void)radioController;
     CVirtualInput *inputDevice = nullptr;
@@ -142,7 +142,7 @@ CVirtualInput* CInputFactory::GetAutoDevice(RadioControllerInterface& radioContr
             case 0: inputDevice = new CAirspy(radioController); break;
 #endif
 #ifdef HAVE_RTLSDR
-            case 1: inputDevice = new CRTL_SDR(radioController); break;
+            case 1: inputDevice = new CRTL_SDR(radioController, options); break;
 #endif
 #ifdef HAVE_SOAPYSDR
             case 2: inputDevice = new CSoapySdr(radioController); break;
@@ -165,7 +165,7 @@ CVirtualInput* CInputFactory::GetAutoDevice(RadioControllerInterface& radioContr
     return inputDevice;
 }
 
-CVirtualInput* CInputFactory::GetManualDevice(RadioControllerInterface& radioController, const std::string& device)
+CVirtualInput* CInputFactory::GetManualDevice(RadioControllerInterface& radioController, const std::string& device, const std::string options)
 {
     CVirtualInput *InputDevice = nullptr;
 
@@ -180,7 +180,7 @@ CVirtualInput* CInputFactory::GetManualDevice(RadioControllerInterface& radioCon
         else
 #ifdef HAVE_RTLSDR
         if (device == "rtl_sdr")
-            InputDevice = new CRTL_SDR(radioController);
+            InputDevice = new CRTL_SDR(radioController, options);
         else
 #endif
 #ifdef HAVE_SOAPYSDR

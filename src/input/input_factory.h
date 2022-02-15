@@ -37,12 +37,12 @@
 class CInputFactory
 {
 public:
-    static CVirtualInput* GetDevice(RadioControllerInterface& radioController, const std::string& Device);
-    static CVirtualInput* GetDevice(RadioControllerInterface& radioController, const CDeviceID deviceId);
+    static CVirtualInput* GetDevice(RadioControllerInterface& radioController, const std::string& Device, const std::string options);
+    static CVirtualInput* GetDevice(RadioControllerInterface& radioController, const CDeviceID deviceId, const std::string options);
 
 private:
-    static CVirtualInput* GetAutoDevice(RadioControllerInterface& radioController);
-    static CVirtualInput* GetManualDevice(RadioControllerInterface& radioController, const std::string& Device);
+    static CVirtualInput* GetAutoDevice(RadioControllerInterface& radioController, const std::string options);
+    static CVirtualInput* GetManualDevice(RadioControllerInterface& radioController, const std::string& Device, const std::string options);
 };
 
 #endif // CINPUTFACTORY_H

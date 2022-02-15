@@ -47,6 +47,7 @@ programme.
 The url where the dab plus server is accessible from.
 A hostname with the port should be given here, it will be used
 as the prefix\-URL for the M3U playlist.
+Example: \fB\-U\fR http://localhost:8000
 .SS "Backend and input options:"
 .TP
 \fB\-f\fR file
@@ -68,6 +69,8 @@ Possible values are: auto (default), airspy, rtl_sdr,
 android_rtl_sdr, rtl_tcp, soapysdr.
 With "rtl_tcp", host IP and port can be specified as
 "rtl_tcp,<HOST_IP>:<PORT>".
+With "rtl_sdr", serial number of the device can be specified as
+"rtl_sdr,<serial\-no>".
 .TP
 \fB\-s\fR args
 SoapySDR Driver arguments.

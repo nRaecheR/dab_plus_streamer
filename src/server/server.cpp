@@ -45,6 +45,7 @@
 #  include "soapy_sdr.h"
 #endif
 #include "rtl_tcp.h"
+#include "rtl_sdr.h"
 #if defined(HAVE_ALSA)
 #  include "server/alsa-output.h"
 #endif
@@ -324,6 +325,7 @@ static void usage()
     "    -U url        The url where the dab plus server is accessible from." << endl <<
     "                  A hostname with the port should be given here, it will be used" << endl <<
     "                  as the prefix-URL for the M3U playlist." << endl <<
+    "                  Example: -U http://localhost:8000" << endl <<
     endl <<
     "Backend and input options:" << endl <<
     "    -f file       Read an IQ file <file> and play with ALSA." << endl <<
@@ -338,6 +340,8 @@ static void usage()
     "                  android_rtl_sdr, rtl_tcp, soapysdr." << endl <<
     "                  With \"rtl_tcp\", host IP and port can be specified as " << endl <<
     "                  \"rtl_tcp,<HOST_IP>:<PORT>\"." << endl <<
+    "                  With \"rtl_sdr\", serial number of the device can be specified as " << endl <<
+    "                  \"rtl_sdr,<serial-no>\"." << endl <<
     "    -s args       SoapySDR Driver arguments." << endl <<
     "    -A antenna    Set input antenna to ANT (for SoapySDR input only)." << endl <<
     "    -T            Disable TII decoding to reduce CPU usage." << endl <<
@@ -501,7 +505,7 @@ int main(int argc, char **argv)
     unique_ptr<CVirtualInput> in = nullptr;
 
     if (options.iqsource.empty()) {
-        in.reset(CInputFactory::GetDevice(ri, options.frontend));
+        in.reset(CInputFactory::GetDevice(ri, options.frontend, options.frontend_args));
 
         if (not in) {
             cerr << "Could not start device" << endl;
@@ -528,7 +532,6 @@ int main(int argc, char **argv)
     else {
         in->setGain(options.gain);
     }
-
 
 #ifdef HAVE_SOAPYSDR
     if (not options.antenna.empty() and in->getID() == CDeviceID::SOAPYSDR) {
@@ -558,6 +561,7 @@ int main(int argc, char **argv)
             // cout << "setting rtl_tcp host to '" << host << "', port to '" << atoi(port.c_str()) << "'" << endl;
         }
     }
+
     auto freq = channels.getFrequency(options.channel);
     in->setFrequency(freq);
     string service_to_tune = options.programme;

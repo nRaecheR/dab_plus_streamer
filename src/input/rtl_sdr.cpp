@@ -32,6 +32,7 @@
 
 #include <iostream>
 #include <exception>
+#include <string>
 
 #include "rtl_sdr.h"
 
@@ -47,10 +48,11 @@
 // Fallback if function is not defined in shared lib
 int __attribute__((weak)) rtlsdr_set_bias_tee(rtlsdr_dev_t *dev, int on);
 
-CRTL_SDR::CRTL_SDR(RadioControllerInterface& radioController) :
+CRTL_SDR::CRTL_SDR(RadioControllerInterface& radioController, std::string options) :
     radioController(radioController),
     sampleBuffer(1024 * 1024),
-    spectrumSampleBuffer(8192)
+    spectrumSampleBuffer(8192),
+    dev_serial(options)
 {
     open_device();
 }
@@ -68,16 +70,39 @@ void CRTL_SDR::open_device()
         throw 0;
     }
     else {
-        std::clog << "RTL_SDR: " << "Found " << deviceCount << " devices. Uses the first working one" << std::endl;
+        std::clog << "RTL_SDR: " << "Found " << deviceCount << " devices.";
     }
+    
+    if(dev_serial.empty())
+		std::clog << "Will try the first usable one." << std::endl;
+	else
+		std::clog << "Will try the device with serial #" << dev_serial << std::endl;
+    
+    char manufact[256], product[256], serial[256];
 
     //	Iterate over all found rtl-sdr devices and try to open it. Stops if one device is successful opened.
     for(uint32_t i=0; i<deviceCount; i++) {
-        ret = rtlsdr_open(&device, i);
-        if (ret >= 0) {
-            std::clog << "RTL_SDR: " << " Opening rtl-sdr device" << i << std::endl;
-            break;
-        }
+		ret = rtlsdr_get_device_usb_strings(i,
+											manufact,
+                                            product,
+                                            serial);
+                                            
+		if (ret < 0){
+			std::clog << "RTL_SDR: " << "Unable to get USB strings for device index " << i << std::endl;
+            throw 0;
+		}
+
+		std::clog      << "RTL_SDR: " << "Index #" << i << " Manufacturer: " << manufact
+					   << " Product: " << product << " Serial:" << serial << std::endl;
+
+		if(dev_serial.empty() || dev_serial == serial)
+		{
+			ret = rtlsdr_open(&device, i);
+			if (ret >= 0) {
+				std::clog << "RTL_SDR: " << " Opening rtl-sdr device" << i << std::endl;
+				break;
+			}
+		}
     }
 
     if (ret < 0) {

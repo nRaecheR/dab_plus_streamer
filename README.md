@@ -1,4 +1,4 @@
-[DAB Plus Streamer]
+DAB Plus Streamer
 =====================
 
 This repository contains the implementation of an SDR DAB/DAB+ streaming server based on welle.io/welle-cli (https://www.welle.io).

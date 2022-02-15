@@ -50,7 +50,7 @@
 // It does not do any processing
 class CRTL_SDR : public CVirtualInput {
 public:
-    CRTL_SDR(RadioControllerInterface& radioController);
+    CRTL_SDR(RadioControllerInterface& radioController, std::string options);
     ~CRTL_SDR(void);
     CRTL_SDR(const CRTL_SDR&) = delete;
     void operator=(const CRTL_SDR&) = delete;
@@ -101,6 +101,8 @@ private:
 
     static void rtlsdr_read_callback(uint8_t* buf, uint32_t len, void *ctx);
     void open_device();
+    
+    std::string dev_serial;
 };
 
 
