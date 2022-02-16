@@ -157,7 +157,11 @@ This allows to select the `rtl_tcp` driver (which is not autodetected) and pass 
     dab_plus_streamer -C 10B -p GRRIF -F rtl_tcp,192.168.12.34:1234
     dab_plus_streamer -C 10B -P GRRIF -F rtl_tcp,my.rtl-tcp.local:9876
 
-Right now, `rtl_tcp` is the only driver that accepts options from the command line.
+The `rtl_sdr` driver allows the selection of the RTL-SDR USB device by specifying a serial number:
+
+    dab_plus_streamer -C 10B -p GRRIF -F rtl_sdr,12345
+    
+where `12345` is the serial number of the USB device. This allows the selection of a specific USB in the case multiple devices are connected to the computer.
 
 Examples: 
 ---
