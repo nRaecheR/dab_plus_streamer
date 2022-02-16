@@ -10,7 +10,6 @@ Table of contents
   * [Building](#building)
     * [General Information](#general-information)
     * [Debian / Ubuntu Linux](#debian--ubuntu-linux)
-    * [CMake instead of Qt Creator (Windows, Linux, macOS)](#cmake-instead-of-qt-creator-windows-linux-macos)
   * [Usage](#usage)
     * [Backend options](#backend-options)
     * [Examples](#examples)
