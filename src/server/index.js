@@ -148,7 +148,7 @@ function ensembleInfoTemplate() {
     var html = '';
     html += ' <h1><abbr title="Ensemble long and short labels defined in FIG1">${label} (${shortlabel})</abbr></h1>';
     html += ' <h2><abbr title="Ensemble long and short labels defined in FIG2">${fig2label}</abbr></h2>';
-    html += ' <div align="right"><p><abbr title="${hw_name}, ${sw_name}">This is welle-cli build version ${version}</abbr></p></div>';
+    html += ' <div align="right"><p><abbr title="${hw_name}, ${sw_name}">This is DAB Plus Streamer build version ${version}</abbr></p></div>';
     html += ' <table id="servicetable">';
     html += ' <tr><th>Ensemble ID </th>';
     html += ' <th>ECC </th>';
