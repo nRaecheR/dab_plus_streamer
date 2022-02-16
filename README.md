@@ -122,11 +122,11 @@ Use -D to dump FIC and all programmes to files:
 
 Use -w to enable webserver, decode a programme on demand:
     
-    dab_plus_streamer -c channel -w port
+    dab_plus_streamer -c channel -w port -U URL
 
 Use -Dw to enable webserver, decode all programmes:
     
-    dab_plus_streamer -c channel -Dw port
+    dab_plus_streamer -c channel -Dw port -U URL
 
 Use `-C 1 -w` to enable webserver, decode programmes one by one in a carousel.
 Use `-C N -w` to enable webserver, decode programmes N by N in a carousel.
@@ -134,10 +134,10 @@ This is useful if your machine cannot decode all programmes simultaneously, but 
 By default dab_plus_streamer will switch every 10 seconds.
 With the `-P` option, dab_plus_streamer will switch once DLS and a slide were decoded, staying at most for 80 seconds on a given programme.
 
-    dab_plus_streamer -c channel -C 1 -w port
-    dab_plus_streamer -c channel -PC 1 -w port
+    dab_plus_streamer -c channel -C 1 -w port -U URL
+    dab_plus_streamer -c channel -PC 1 -w port -U URL
     
-Example: `dab_plus_streamer -c 12A -C 1 -w 7979` enables the webserver on channel 12A, please then go to http://localhost:7979/ where you can observe all necessary details for every service ID in the ensemble, see the slideshows, stream the audio (by clicking on the Play-Button), check spectrum, constellation, TII information and CIR peak diagramme.
+Example: `dab_plus_streamer -c 12A -C 1 -w 7979 -U http://localhost:7979` enables the webserver on channel 12A, please then go to http://localhost:7979/ where you can observe all necessary details for every service ID in the ensemble, see the slideshows, stream the audio by downloading a M3U playlist and start an external application, check spectrum, constellation, TII information and CIR peak diagramme.
 
 Backend options
 ---
