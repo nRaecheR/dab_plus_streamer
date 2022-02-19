@@ -30,13 +30,6 @@ Dump programme to <programme_name.msc> file.
 \fB\-w\fR port
 Enable web server on port <port>.
 .TP
-\fB\-C\fR number
-Number of programmes to decode in a carousel
-(to be used with \fB\-w\fR, cannot be used with \fB\-D\fR).
-This is useful if your machine cannot decode all programmes
-simultaneously, but you still want to get an overview of
-the ensemble.
-.TP
 \fB\-P\fR
 Without the \fB\-P\fR option, dab_plus_streamer will switch every 10 seconds.
 With the \fB\-P\fR option, dab_plus_streamer will switch once DLS and a
@@ -121,17 +114,6 @@ Enable web server on port 8000, decode programmes on channel 10B on demand
 dab_plus_streamer \-c 10B \-Dw 8000
 .IP
 Enable web server on port 8000, decode all programmes on channel 10B.
-.PP
-dab_plus_streamer \-c 10B \-C 1 \-w 8000
-.IP
-Enable web server on port 8000, decode programmes one by one in a carousel
-on channel 10B; dab_plus_streamer will switch every 10 seconds.
-.PP
-dab_plus_streamer \-c 10B \-PC 1 \-w 8000
-.IP
-Enable web server on port 8000, decode programmes one by one in a carousel
-on channel 10B; dab_plus_streamer will switch once DLS and a slide were decoded,
-staying at most 80 seconds on a given programme.
 .SH AUTHOR
 Written by: Arne Bockholdt
 Other contributors: <https://github.com/nRaecheR/dab_plus_streamer/blob/master/AUTHORS>

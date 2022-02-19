@@ -284,7 +284,6 @@ struct options_t {
     string frontend_args = "";
     bool dump_programme = false;
     bool decode_all_programmes = false;
-    int num_decoders_in_carousel = 0;
     bool carousel_pad = false;
     string web_url = "";
     int web_port = -1; // positive value means enable
@@ -313,11 +312,6 @@ static void usage()
     endl <<
     "Web server mode:" << endl <<
     "    -w port       Enable web server on port <port>." << endl <<
-    "    -C number     Number of programmes to decode in a carousel" << endl <<
-    "                  (to be used with -w, cannot be used with -D)." << endl <<
-    "                  This is useful if your machine cannot decode all programmes" << endl <<
-    "                  simultaneously, but you still want to get an overview of" << endl <<
-    "                  the ensemble." << endl <<
     "    -P            Without the -P option, dab_plus_streamer will switch every 10 seconds." << endl <<
     "                  With the -P option, dab_plus_streamer will switch once DLS and a" << endl <<
     "                  slide were decoded, staying at most 80 seconds on a given" << endl <<
@@ -377,15 +371,6 @@ static void usage()
     "dab_plus_streamer -c 10B -Dw 8000" << endl <<
     "    Enable web server on port 8000, decode all programmes on channel 10B." << endl <<
     endl <<
-    "dab_plus_streamer -c 10B -C 1 -w 8000" << endl <<
-    "    Enable web server on port 8000, decode programmes one by one in a carousel" << endl <<
-    "    on channel 10B; dab_plus_streamer will switch every 10 seconds." << endl <<
-    endl <<
-    "dab_plus_streamer -c 10B -PC 1 -w 8000" << endl <<
-    "    Enable web server on port 8000, decode programmes one by one in a carousel" << endl <<
-    "    on channel 10B; dab_plus_streamer will switch once DLS and a slide were decoded," << endl <<
-    "    staying at most 80 seconds on a given programme." << endl <<
-    endl <<
     "Report bugs to: <https://github.com/nRaecheR/dab_plus_streamer/issues>" << endl;
 }
 
@@ -419,9 +404,6 @@ options_t parse_cmdline(int argc, char **argv)
                 break;
             case 'c':
                 options.channel = optarg;
-                break;
-            case 'C':
-                options.num_decoders_in_carousel = std::atoi(optarg);
                 break;
             case 'd':
                 options.dump_programme = true;
@@ -484,10 +466,6 @@ options_t parse_cmdline(int argc, char **argv)
         } else {
             options.frontend = fe_opt;
         }
-    }
-    if (options.decode_all_programmes and options.num_decoders_in_carousel > 0) {
-        cerr << "Cannot select both -C and -D" << endl;
-        exit(1);
     }
 
     return options;
@@ -578,15 +556,7 @@ int main(int argc, char **argv)
         if (options.decode_all_programmes) {
             ds.strategy = DS::All;
         }
-        else if (options.num_decoders_in_carousel > 0) {
-            if (options.carousel_pad) {
-                ds.strategy = DS::CarouselPAD;
-            }
-            else {
-                ds.strategy = DS::Carousel10;
-            }
-            ds.num_decoders_in_carousel = options.num_decoders_in_carousel;
-        }
+
         WebRadioInterface wri(*in, options.web_port, options.web_url, ds, options.rro);
         wri.serve();
     }

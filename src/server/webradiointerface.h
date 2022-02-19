@@ -56,19 +56,11 @@ class WebRadioInterface : public RadioControllerInterface {
             OnDemand,
 
             /* Decode all services simultaneously */
-            All,
-
-            /* Decode all services one by one, for 10s */
-            Carousel10,
-
-            /* Decode all services one by one, switch when
-             * DLS and slide were decoded, stay at most 80s on one service.  */
-            CarouselPAD
+            All
         };
 
         struct DecodeSettings {
             DecodeStrategy strategy = DecodeStrategy::OnDemand;
-            int num_decoders_in_carousel = 0;
         };
 
         WebRadioInterface(
@@ -206,14 +198,4 @@ class WebRadioInterface : public RadioControllerInterface {
         std::map<SId_t, WebProgrammeHandler> phs;
         std::map<SId_t, bool> programmes_being_decoded;
         std::condition_variable phs_changed;
-
-        std::list<SId_t> carousel_services_available;
-        struct ActiveCarouselService {
-            explicit ActiveCarouselService(SId_t sid) : sid(sid) {
-                time_change = std::chrono::steady_clock::now();
-            }
-            SId_t sid;
-            std::chrono::time_point<std::chrono::steady_clock> time_change;
-        };
-        std::list<ActiveCarouselService> carousel_services_active;
 };
