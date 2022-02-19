@@ -604,7 +604,7 @@ bool WebRadioInterface::send_mux_json(Socket& s)
 {
     MuxJson mux_json;
 
-    mux_json.receiver.software.name = "welle.io";
+    mux_json.receiver.software.name = "dab_plus_streamer";
     mux_json.receiver.software.version = VERSION;
     mux_json.receiver.software.fftwindowplacement = fftPlacementMethodToString(rro.fftPlacementMethod);
     mux_json.receiver.software.coarsecorrectorenabled = not rro.disableCoarseCorrector;
@@ -735,21 +735,21 @@ bool WebRadioInterface::send_mux_json(Socket& s)
         mux_json.utctime.minutes = last_dateTime.minutes;
         mux_json.utctime.lto = last_dateTime.hourOffset + ((double)last_dateTime.minuteOffset / 30.0);
 
-        for (const auto& m : pending_messages) {
+        for (const auto& message : pending_messages) {
             using namespace chrono;
 
             stringstream ss;
 
-            const auto ms = duration_cast<milliseconds>(
-                    m.timestamp.time_since_epoch());
+            const auto millisec_dur = duration_cast<milliseconds>(
+                    message.timestamp.time_since_epoch());
 
-            const auto s = duration_cast<seconds>(ms);
-            const std::time_t t = s.count();
-            const std::size_t fractional_seconds = ms.count() % 1000;
+            const auto sec_dur = duration_cast<seconds>(millisec_dur);
+            const std::time_t t = sec_dur.count();
+            const std::size_t fractional_seconds = millisec_dur.count() % 1000;
 
             ss << std::ctime(&t) << "." << fractional_seconds;
 
-            switch (m.level) {
+            switch (message.level) {
                 case message_level_t::Information:
                     ss << " INFO : ";
                     break;
@@ -758,7 +758,7 @@ bool WebRadioInterface::send_mux_json(Socket& s)
                     break;
             }
 
-            ss << m.text;
+            ss << message.text;
             mux_json.messages.push_back(ss.str());
         }
 
@@ -799,16 +799,16 @@ bool WebRadioInterface::send_mux_playlist(Socket& s)
         lock_guard<mutex> lock(rx_mut);
         ASSERT_RX;
 
-        for (const auto& s : rx->getServiceList()) {
-            auto hex_sid = to_hex(s.serviceId, 4);
-            auto label = s.serviceLabel.utf8_label();
+        for (const auto& service : rx->getServiceList()) {
+            auto hex_sid = to_hex(service.serviceId, 4);
+            auto label = service.serviceLabel.utf8_label();
             string url_mp3 = "";
 
-            for (const auto& sc : rx->getComponents(s)) {
-                switch (sc.transportMode()) {
+            for (const auto& servicecomponent : rx->getComponents(service)) {
+                switch (servicecomponent.transportMode()) {
                     case TransportMode::Audio:
-                        if (sc.audioType() == AudioServiceComponentType::DAB or
-                            sc.audioType() == AudioServiceComponentType::DABPlus) {
+                        if (servicecomponent.audioType() == AudioServiceComponentType::DAB or
+                            servicecomponent.audioType() == AudioServiceComponentType::DABPlus) {
                             url_mp3 = "/mp3/" + hex_sid;
                         }
                         break;
@@ -842,12 +842,12 @@ bool WebRadioInterface::send_mp3(Socket& s, const std::string& stream)
     unique_lock<mutex> lock(rx_mut);
     ASSERT_RX;
 
-    for (const auto& srv : rx->getServiceList()) {
-        if (rx->serviceHasAudioComponent(srv) and
-                (to_hex(srv.serviceId, 4) == stream or
-                (uint32_t)std::stoul(stream) == srv.serviceId)) {
+    for (const auto& service : rx->getServiceList()) {
+        if (rx->serviceHasAudioComponent(service) and
+                (to_hex(service.serviceId, 4) == stream or
+                (uint32_t)std::stoul(stream) == service.serviceId)) {
             try {
-                auto& ph = phs.at(srv.serviceId);
+                auto& ph = phs.at(service.serviceId);
 
                 lock.unlock();
 
@@ -871,7 +871,7 @@ bool WebRadioInterface::send_mp3(Socket& s, const std::string& stream)
             }
             catch (const out_of_range& e) {
                 cerr << "Could not setup mp3 sender for " <<
-                    srv.serviceId << ": " << e.what() << endl;
+                    service.serviceId << ": " << e.what() << endl;
 
                 send_http_response(s, http_503, e.what());
                 return false;
@@ -1231,12 +1231,12 @@ void WebRadioInterface::handle_phs()
         ASSERT_RX;
 
         auto serviceList = rx->getServiceList();
-        for (auto& s : serviceList) {
-            auto scs = rx->getComponents(s);
+        for (auto& service : serviceList) {
+            auto servicecomponent = rx->getComponents(service);
 
-            if (phs.count(s.serviceId) == 0) {
-                WebProgrammeHandler ph(s.serviceId);
-                phs.emplace(std::make_pair(s.serviceId, move(ph)));
+            if (phs.count(service.serviceId) == 0) {
+                WebProgrammeHandler ph(service.serviceId);
+                phs.emplace(std::make_pair(service.serviceId, move(ph)));
             }
         }
 
@@ -1250,9 +1250,9 @@ void WebRadioInterface::handle_phs()
         for (auto& ph : phs) {
             ph.second.cancelAll();
 
-            const auto srv = rx->getService(ph.first);
-            if (srv.serviceId != 0) {
-                (void)rx->removeServiceToDecode(srv);
+            const auto service = rx->getService(ph.first);
+            if (service.serviceId != 0) {
+                (void)rx->removeServiceToDecode(service);
             }
         }
     }
