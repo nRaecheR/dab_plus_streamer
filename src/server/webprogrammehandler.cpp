@@ -227,7 +227,9 @@ void WebProgrammeHandler::onNewAudio(std::vector<int16_t>&& audioData,
         lame_set_in_samplerate(lame.lame, rate);
         lame_set_num_channels(lame.lame, channels);
         lame_set_VBR(lame.lame, vbr_default);
-        lame_set_VBR_q(lame.lame, 2);
+        lame_set_VBR_q(lame.lame, 0);
+		lame_set_VBR_min_bitrate_kbps( lame.lame, 96 );
+		lame_set_VBR_max_bitrate_kbps( lame.lame, 320 );
         lame_init_params(lame.lame);
         lame_initialised = true;
     }
