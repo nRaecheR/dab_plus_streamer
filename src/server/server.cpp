@@ -284,7 +284,6 @@ struct options_t {
     string frontend_args = "";
     bool dump_programme = false;
     bool decode_all_programmes = false;
-    bool carousel_pad = false;
     string web_url = "";
     int web_port = -1; // positive value means enable
     list<int> tests;
@@ -312,10 +311,6 @@ static void usage()
     endl <<
     "Web server mode:" << endl <<
     "    -w port       Enable web server on port <port>." << endl <<
-    "    -P            Without the -P option, dab_plus_streamer will switch every 10 seconds." << endl <<
-    "                  With the -P option, dab_plus_streamer will switch once DLS and a" << endl <<
-    "                  slide were decoded, staying at most 80 seconds on a given" << endl <<
-    "                  programme." << endl <<
     "    -U url        The url where the dab plus server is accessible from." << endl <<
     "                  A hostname with the port should be given here, it will be used" << endl <<
     "                  as the prefix-URL for the M3U playlist." << endl <<
@@ -422,9 +417,6 @@ options_t parse_cmdline(int argc, char **argv)
                 break;
             case 'p':
                 options.programme = optarg;
-                break;
-            case 'P':
-                options.carousel_pad = true;
                 break;
             case 'h':
                 usage();
