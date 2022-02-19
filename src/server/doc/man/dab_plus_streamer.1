@@ -15,7 +15,7 @@ dab_plus_streamer \- dab-plus-streamer command line interface
 Tune to <channel> (eg. 10B, 5A, LD...).
 .TP
 \fB\-p\fR programme
-Play <programme> with ALSA (text name of the radio: eg. GRIFF).
+Tune to <programme> (text name of the radio: eg. GRIFF).
 .SS "Dumping:"
 .TP
 \fB\-D\fR
@@ -38,7 +38,7 @@ Example: \fB\-U\fR http://localhost:8000
 .SS "Backend and input options:"
 .TP
 \fB\-f\fR file
-Read an IQ file <file> and play with ALSA.
+Read an IQ file <file>.
 IQ file format is u8, unless the file ends with 'FORMAT.iq'.
 .TP
 \fB\-u\fR
@@ -79,22 +79,13 @@ Display this help and exit.
 \fB\-v\fR
 Output version information and exit.
 .SH EXAMPLES
-dab_plus_streamer \-c 10B \-p GRRIF
-.IP
-Receive 'GRRIF' on channel '10B' using 'auto' driver, and play with ALSA.
-.PP
-dab_plus_streamer \-f ./ofdm.iq \-p GRRIF
-.IP
-Read IQ file './ofdm.iq' (in u8 format) and play programme 'GRIFF' with ALSA.
-.PP
 dab_plus_streamer \-f ./ofdm.iq \-t 1
 .IP
 Read IQ file './ofdm.iq' (in u8 format), and run test 1.
 .PP
 dab_plus_streamer \-c 10B \-p GRRIF \-F rtl_tcp,localhost:1234
 .IP
-Receive 'GRRIF' on channel '10B' using 'rtl_tcp' driver on localhost:1234,
-and play with ALSA.
+Receive 'GRRIF' on channel '10B' using 'rtl_tcp' driver on localhost:1234.
 .PP
 dab_plus_streamer \-c 10B \-D
 .IP

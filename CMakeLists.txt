@@ -38,11 +38,6 @@ if(PROFILING)
     add_definitions(-DWITH_PROFILING)
 endif()
 
-find_package(ALSA)
-if(ALSA_FOUND)
-    add_definitions(-DHAVE_ALSA)
-endif()
-
 if(KISS_FFT)
     add_definitions(-DKISSFFT)
     set(fft_sources src/libs/kiss_fft/kiss_fft.c)
@@ -123,7 +118,6 @@ set(backend_sources
 
 set(server_sources
     src/server/server.cpp
-    src/server/alsa-output.cpp
     src/server/webradiointerface.cpp
     src/server/jsonconvert.cpp
     src/server/webprogrammehandler.cpp
@@ -195,7 +189,6 @@ target_link_libraries (${ExecutableName}
   ${LIBAIRSPY_LIBRARIES}
   ${FFTW3F_LIBRARIES}
   ${FAAD_LIBRARIES}
-  ${ALSA_LIBRARIES}
   ${LAME_LIBRARIES}
   ${SoapySDR_LIBRARIES}
   ${MPG123_LIBRARIES}

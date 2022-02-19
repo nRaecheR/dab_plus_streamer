@@ -107,11 +107,11 @@ make install
 Usage
 ====================
 
-Receive using RTLSDR, and play with ALSA:
+Receive using RTLSDR, and tune to programme:
 
     dab_plus_streamer -c channel -p programme
 
-Read an IQ file and play with ALSA: (IQ file format is u8, unless the file ends with FORMAT.iq)
+Read an IQ file and tune to programme: (IQ file format is u8, unless the file ends with FORMAT.iq)
 
     dab_plus_streamer -f file -p programme
 

@@ -46,9 +46,6 @@
 #endif
 #include "rtl_tcp.h"
 #include "rtl_sdr.h"
-#if defined(HAVE_ALSA)
-#  include "server/alsa-output.h"
-#endif
 #include "server/webradiointerface.h"
 #include "server/tests.h"
 #include "backend/radio-receiver.h"
@@ -69,48 +66,6 @@ extern "C" {
 using namespace std;
 
 using namespace nlohmann;
-
-#if defined(HAVE_ALSA)
-class AlsaProgrammeHandler: public ProgrammeHandlerInterface {
-    public:
-        virtual void onFrameErrors(int frameErrors) override { (void)frameErrors; }
-        virtual void onNewAudio(std::vector<int16_t>&& audioData, int sampleRate, const std::string& mode) override
-        {
-            (void)mode;
-            lock_guard<mutex> lock(aomutex);
-
-            bool reset_ao = sampleRate != (int)rate;
-            rate = sampleRate;
-
-            if (!ao or reset_ao) {
-                cerr << "Create audio output rate " << rate << endl;
-                ao = make_unique<AlsaOutput>(2, rate);
-            }
-
-            ao->playPCM(move(audioData));
-        }
-
-        virtual void onRsErrors(bool uncorrectedErrors, int numCorrectedErrors) override {
-            (void)uncorrectedErrors; (void)numCorrectedErrors; }
-        virtual void onAacErrors(int aacErrors) override { (void)aacErrors; }
-        virtual void onNewDynamicLabel(const std::string& label) override
-        {
-            cout << "DLS: " << label << endl;
-        }
-
-        virtual void onMOT(const mot_file_t& mot_file) override { (void)mot_file; }
-        virtual void onPADLengthError(size_t announced_xpad_len, size_t xpad_len) override
-        {
-            cout << "X-PAD length mismatch, expected: " << announced_xpad_len << " got: " << xpad_len << endl;
-        }
-
-    private:
-        mutex aomutex;
-        unique_ptr<AlsaOutput> ao;
-        bool stereo = true;
-        unsigned int rate = 48000;
-};
-#endif // defined(HAVE_ALSA)
 
 class WavProgrammeHandler: public ProgrammeHandlerInterface {
     public:
@@ -285,7 +240,7 @@ struct options_t {
     bool dump_programme = false;
     bool decode_all_programmes = false;
     string web_url = "";
-    int web_port = -1; // positive value means enable
+    int web_port = 7979; // positive value means enable
     list<int> tests;
 
     RadioReceiverOptions rro;
@@ -301,7 +256,7 @@ static void usage()
     endl <<
     "Tuning:" << endl <<
     "    -c channel    Tune to <channel> (eg. 10B, 5A, LD...)." << endl <<
-    "    -p programme  Play <programme> with ALSA (text name of the radio: eg. GRIFF)." << endl <<
+    "    -p programme  Tune to <programme> (text name of the radio: eg. GRIFF)." << endl <<
     endl <<
     "Dumping:" << endl <<
     "    -D            Dump FIC and all programmes to files (cannot be used with -C)." << endl <<
@@ -310,14 +265,14 @@ static void usage()
     "    -d            Dump programme to <programme_name.msc> file." << endl <<
     endl <<
     "Web server mode:" << endl <<
-    "    -w port       Enable web server on port <port>." << endl <<
+    "    -w port       Enable web server on port <port>. Default: 7979" << endl <<
     "    -U url        The url where the dab plus server is accessible from." << endl <<
     "                  A hostname with the port should be given here, it will be used" << endl <<
     "                  as the prefix-URL for the M3U playlist." << endl <<
     "                  Example: -U http://localhost:8000" << endl <<
     endl <<
     "Backend and input options:" << endl <<
-    "    -f file       Read an IQ file <file> and play with ALSA." << endl <<
+    "    -f file       Read an IQ file <file>." << endl <<
     "                  IQ file format is u8, unless the file ends with 'FORMAT.iq'." << endl <<
     "    -u            Disable coarse corrector, for receivers who have a low " << endl <<
     "                  frequency offset." << endl <<
@@ -343,18 +298,11 @@ static void usage()
     endl <<
     "Examples:" << endl <<
     endl <<
-    "dab_plus_streamer -c 10B -p GRRIF" << endl <<
-    "    Receive 'GRRIF' on channel '10B' using 'auto' driver, and play with ALSA." << endl <<
-    endl <<
-    "dab_plus_streamer -f ./ofdm.iq -p GRRIF" << endl <<
-    "    Read IQ file './ofdm.iq' (in u8 format) and play programme 'GRIFF' with ALSA." << endl <<
-    endl <<
     "dab_plus_streamer -f ./ofdm.iq -t 1" << endl <<
     "    Read IQ file './ofdm.iq' (in u8 format), and run test 1." << endl <<
     endl <<
     "dab_plus_streamer -c 10B -p GRRIF -F rtl_tcp,localhost:1234" << endl <<
-    "    Receive 'GRRIF' on channel '10B' using 'rtl_tcp' driver on localhost:1234," << endl <<
-    "    and play with ALSA." << endl <<
+    "    Receive 'GRRIF' on channel '10B' using 'rtl_tcp' driver on localhost:1234." << endl <<
     endl <<
     "dab_plus_streamer -c 10B -D " << endl <<
     "    Dump FIC and all programmes of channel 10B to files." << endl <<
@@ -617,58 +565,6 @@ int main(int argc, char **argv)
                     break;
                 }
             }
-        }
-        else {
-#if defined(HAVE_ALSA)
-            AlsaProgrammeHandler ph;
-            while (not service_to_tune.empty()) {
-                cerr << "Service list" << endl;
-                for (const auto& s : rx.getServiceList()) {
-                    cerr << "  [0x" << std::hex << s.serviceId << std::dec << "] " <<
-                        s.serviceLabel.utf8_label() << " ";
-                    for (const auto& sc : rx.getComponents(s)) {
-                        cerr << " [component "  << sc.componentNr <<
-                            " ASCTy: " <<
-                            (sc.audioType() == AudioServiceComponentType::DAB ? "DAB" :
-                             sc.audioType() == AudioServiceComponentType::DABPlus ? "DAB+" : "unknown") << " ]";
-
-                        const auto& sub = rx.getSubchannel(sc);
-                        cerr << " [subch " << sub.subChId << " bitrate:" << sub.bitrate() << " at SAd:" << sub.startAddr << "]";
-                    }
-                    cerr << endl;
-                }
-
-                bool service_selected = false;
-                for (const auto s : rx.getServiceList()) {
-                    if (s.serviceLabel.utf8_label().find(service_to_tune) != string::npos) {
-                        service_selected = true;
-                        string dumpFileName;
-                        if (options.dump_programme) {
-                            dumpFileName = s.serviceLabel.utf8_label();
-                            dumpFileName.erase(std::find_if(dumpFileName.rbegin(), dumpFileName.rend(),
-                                        [](int ch) { return !std::isspace(ch); }).base(), dumpFileName.end());
-                            dumpFileName += ".msc";
-                        }
-                        if (rx.playSingleProgramme(ph, dumpFileName, s) == false) {
-                            cerr << "Tune to " << service_to_tune << " failed" << endl;
-                        }
-                    }
-                }
-                if (not service_selected) {
-                    cerr << "Could not tune to " << service_to_tune << endl;
-                }
-
-                cerr << "**** Please enter programme name. Enter '.' to quit." << endl;
-
-                cin >> service_to_tune;
-                if (service_to_tune == ".") {
-                    break;
-                }
-                cerr << "**** Trying to tune to " << service_to_tune << endl;
-            }
-#else
-            cerr << "Nothing to do, not ALSA support." << endl;
-#endif // defined(HAVE_ALSA)
         }
     }
 
