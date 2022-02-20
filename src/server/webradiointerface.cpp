@@ -23,7 +23,7 @@
  *
  */
 
-#include "server/webradiointerface.h"
+
 #include <algorithm>
 #include <cmath>
 #include <complex>
@@ -38,16 +38,10 @@
 #include <regex>
 #include <signal.h>
 #include <stdexcept>
-
-#if defined(_WIN32)
- #include <winsock2.h>
- #include <ws2tcpip.h>
- #include <windows.h>
-#else
- #include <sys/socket.h>
-#endif
-
+#include <sys/socket.h>
 #include <utility>
+
+#include "webradiointerface.h"
 #include "Socket.h"
 #include "channels.h"
 #include "ofdm-decoder.h"

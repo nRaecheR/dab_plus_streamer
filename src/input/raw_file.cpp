@@ -41,12 +41,7 @@
 
 #include "raw_file.h"
 
-// For Qt translation if Qt is existing
-#ifdef QT_CORE_LIB
-    #include <QtGlobal>
-#else
-    #define QT_TRANSLATE_NOOP(x,y) (y)
-#endif
+#define QT_TRANSLATE_NOOP(x,y) (y)
 
 static inline int64_t getMyTime(void)
 {

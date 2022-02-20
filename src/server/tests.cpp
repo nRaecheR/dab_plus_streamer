@@ -260,9 +260,9 @@ void Tests::test_with_noise_iteration(double stddev)
     while (not service_selected) {
         this_thread::sleep_for(chrono::seconds(1));
 
-        for (const auto s : rx.getServiceList()) {
-            if (rx.playSingleProgramme(tph, dumpFileName, s) == false) {
-                cerr << "Tune to " << s.serviceLabel.utf8_label() << " failed" << endl;
+        for (const auto service : rx.getServiceList()) {
+            if (rx.playSingleProgramme(tph, dumpFileName, service) == false) {
+                cerr << "Tune to " << service.serviceLabel.utf8_label() << " failed" << endl;
             }
             else {
                 service_selected = true;
@@ -330,9 +330,9 @@ void Tests::test_multipath(int test_id)
     while (not service_selected) {
         this_thread::sleep_for(chrono::seconds(1));
 
-        for (const auto s : rx.getServiceList()) {
-            if (rx.playSingleProgramme(tph, dumpFileName, s) == false) {
-                cerr << "Tune to " << s.serviceLabel.utf8_label() << " failed" << endl;
+        for (const auto service : rx.getServiceList()) {
+            if (rx.playSingleProgramme(tph, dumpFileName, service) == false) {
+                cerr << "Tune to " << service.serviceLabel.utf8_label() << " failed" << endl;
             }
             else {
                 service_selected = true;

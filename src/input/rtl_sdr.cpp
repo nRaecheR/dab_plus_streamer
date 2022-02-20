@@ -36,12 +36,7 @@
 
 #include "rtl_sdr.h"
 
-// For Qt translation if Qt is existing
-#ifdef QT_CORE_LIB
-    #include <QtGlobal>
-#else
-    #define QT_TRANSLATE_NOOP(x,y) (y)
-#endif
+#define QT_TRANSLATE_NOOP(x,y) (y)
 
 #define READLEN_DEFAULT 8192
 

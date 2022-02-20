@@ -31,12 +31,7 @@
 #include <iostream>
 #include "limesdr.h"
 
-// For Qt translation if Qt is existing
-#ifdef QT_CORE_LIB
-#include <QtGlobal>
-#else
 #define QT_TRANSLATE_NOOP(x,y) (y)
-#endif
 
 #define FIFO_SIZE 32768
 static

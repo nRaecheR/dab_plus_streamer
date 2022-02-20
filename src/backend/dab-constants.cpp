@@ -31,12 +31,7 @@
 #include <exception>
 #include <sstream>
 
-// For Qt translation if Qt is existing
-#ifdef QT_CORE_LIB
-    #include <QtGlobal>
-#else
-    #define QT_TR_NOOP(x) (x)
-#endif
+#define QT_TR_NOOP(x) (x)
 
 using namespace std;
 

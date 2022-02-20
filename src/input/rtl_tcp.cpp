@@ -35,12 +35,7 @@
 
 #include "rtl_tcp.h"
 
-// For Qt translation if Qt is existing
-#ifdef QT_CORE_LIB
-    #include <QtGlobal>
-#else
-    #define QT_TRANSLATE_NOOP(x,y) (y)
-#endif
+#define QT_TRANSLATE_NOOP(x,y) (y)
 
 // commands are packed in 5 bytes, one "command byte"
 // and an integer parameter
@@ -499,7 +494,7 @@ void CRTL_TCP_Client::networkBufferCopy()
 
         if(getMyTime() - oldTime_us > 500e3) { // 500 ms
 
-            float bufferFill = (float) sampleNetworkBuffer.GetRingBufferReadAvailable() / sampleNetworkBuffer.GetBufferSize() * 100;
+            //float bufferFill = (float) sampleNetworkBuffer.GetRingBufferReadAvailable() / sampleNetworkBuffer.GetBufferSize() * 100;
             //std::clog << "RTL_TCP_CLIENT: Network buffer fill level " << bufferFill << "%" << std::endl;
 
             oldTime_us = getMyTime();

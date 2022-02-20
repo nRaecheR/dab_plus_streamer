@@ -28,12 +28,7 @@
 
 #include <iostream>
 
-// For Qt translation if Qt is existing
-#ifdef QT_CORE_LIB
-    #include <QtGlobal>
-#else
-    #define QT_TRANSLATE_NOOP(x,y) (y)
-#endif
+#define QT_TRANSLATE_NOOP(x,y) (y)
 
 #include "input_factory.h"
 #include "null_device.h"
@@ -54,10 +49,6 @@
 
 #ifdef HAVE_LIMESDR
 #include "limesdr.h"
-#endif
-
-#ifdef __ANDROID__
-#include "android_rtl_sdr.h"
 #endif
 
 CVirtualInput *CInputFactory::GetDevice(RadioControllerInterface& radioController, const std::string& device, const std::string options)

@@ -44,8 +44,8 @@
 #ifdef HAVE_SOAPYSDR
 #  include "soapy_sdr.h"
 #endif
-#include "rtl_tcp.h"
-#include "rtl_sdr.h"
+#include <rtl_tcp.h>
+#include <rtl_sdr.h>
 #include "server/webradiointerface.h"
 #include "server/tests.h"
 #include "backend/radio-receiver.h"

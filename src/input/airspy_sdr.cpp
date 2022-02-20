@@ -35,12 +35,7 @@
 #include <iostream>
 #include "airspy_sdr.h"
 
-// For Qt translation if Qt is existing
-#ifdef QT_CORE_LIB
-    #include <QtGlobal>
-#else
-    #define QT_TRANSLATE_NOOP(x,y) (y)
-#endif
+#define QT_TRANSLATE_NOOP(x,y) (y)
 
 static const int EXTIO_NS = 8192;
 static const int EXTIO_BASE_TYPE_SIZE = sizeof(float);
