@@ -232,7 +232,7 @@ struct options_t {
     string soapySDRDriverArgs = "";
     string antenna = "";
     int gain = -1;
-    string channel = "10B";
+    list<string> channels;
     string iqsource = "";
     string programme = "GRRIF";
     string frontend = "auto";
@@ -337,6 +337,7 @@ options_t parse_cmdline(int argc, char **argv)
 {
     options_t options;
     string fe_opt = "";
+    string ch_opt = "";
     options.rro.decodeTII = true;
 
     int opt;
@@ -346,7 +347,7 @@ options_t parse_cmdline(int argc, char **argv)
                 options.antenna = optarg;
                 break;
             case 'c':
-                options.channel = optarg;
+                ch_opt = optarg;
                 break;
             case 'd':
                 options.dump_programme = true;
@@ -406,6 +407,23 @@ options_t parse_cmdline(int argc, char **argv)
         } else {
             options.frontend = fe_opt;
         }
+    }
+
+    // Parse channel list
+    while(!ch_opt.empty()) {
+        size_t comma = ch_opt.find(',');
+        if (comma != string::npos) {
+            options.channels.push_back(ch_opt.substr(0,comma));
+            ch_opt = ch_opt.substr(comma+1);
+        } else {
+            options.channels.push_back(ch_opt);
+            ch_opt="";
+        }
+    }
+
+    if(options.channels.empty()) {
+        usage();
+        exit(1);
     }
 
     return options;
@@ -480,7 +498,19 @@ int main(int argc, char **argv)
         }
     }
 
-    auto freq = channels.getFrequency(options.channel);
+    // Check given channel list for valid IDs/frequencies
+    for (const auto& channel: options.channels) {
+
+        auto freq = channels.getFrequency(channel);
+        if(0 == freq) {
+            cerr << "Invalid channel ID given" << endl;
+            return 1;
+        }
+
+        cout << "ARG: Channel=" << channel << ", Frequency=" << freq << endl;
+    }
+
+    auto freq = channels.getFrequency(options.channels.front());
     in->setFrequency(freq);
     string service_to_tune = options.programme;
 
