@@ -67,6 +67,11 @@ class ChannelSimulator : public CVirtualInput
         virtual void setFrequency(int frequency)
             { parentInput->setFrequency(frequency); }
 
+        virtual void setFrequencies(std::list<int> frequencies, int index)
+        {
+            parentInput->setFrequencies(frequencies, index);
+        }
+
         virtual int getFrequency(void) const
             { return parentInput->getFrequency(); }
 

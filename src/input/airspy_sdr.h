@@ -60,6 +60,7 @@ public:
 
     void setFrequency(int nf);
     int getFrequency(void) const;
+    void setFrequencies(std::list<int> frequencies, int index = 0);
     bool restart(void);
     bool is_ok(void);
     void stop(void);
@@ -85,6 +86,7 @@ private:
 
     bool running = false;
     int freq = 0;
+    std::list<int> frequencies;
 
     size_t num_frames = 0;
 

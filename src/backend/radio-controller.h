@@ -37,6 +37,7 @@
 #include <vector>
 #include <string>
 #include <complex>
+#include <list>
 #include "dab-constants.h"
 
 struct dab_date_time_t {
@@ -182,6 +183,7 @@ class InputInterface {
 public:
     virtual ~InputInterface() {}
     virtual void setFrequency(int frequency) = 0;
+    virtual void setFrequencies(std::list<int> frequencies, int index = 0) = 0;
     virtual int getFrequency(void) const = 0;
     virtual bool is_ok(void) = 0;
     virtual bool restart(void) = 0;

@@ -109,6 +109,18 @@ void CAirspy::setFrequency(int nf)
     }
 }
 
+void CAirspy::setFrequencies(std::list<int> frequencies, int index)
+{
+    this->frequencies = frequencies;
+
+    auto it = this->frequencies.begin();
+
+    advance(it, index);
+
+    this->setFrequency(*it);
+}
+
+
 int CAirspy::getFrequency() const
 {
     return freq;

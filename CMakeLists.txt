@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD 14)
 option(KISS_FFT          "KISS FFT instead of FFTW"              OFF )
 option(PROFILING         "Enable profiling (see README.md)"      OFF )
 option(AIRSPY            "Compile with Airspy support"           OFF )
-option(RTLSDR            "Compile with RTL-SDR support"          OFF )
+option(RTLSDR            "Compile with RTL-SDR support"          ON )
 option(SOAPYSDR          "Compile with SoapySDR support"         OFF )
 
 add_definitions(-Wall)

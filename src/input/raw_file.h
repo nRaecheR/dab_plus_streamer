@@ -53,6 +53,7 @@ public:
 
     // Interface methods
     void setFrequency(int Frequency);
+    void setFrequencies(std::list<int> frequencies, int index = 0);
     int getFrequency(void) const;
     int32_t getSamples(DSPCOMPLEX*, int32_t);
     std::vector<DSPCOMPLEX> getSpectrumSamples(int size);

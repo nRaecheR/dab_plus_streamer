@@ -87,6 +87,17 @@ void CRTL_TCP_Client::setFrequency(int newFrequency)
     sendVFO(newFrequency);
 }
 
+void CRTL_TCP_Client::setFrequencies(std::list<int> frequencies, int index)
+{
+    this->frequencies = frequencies;
+
+    auto it = this->frequencies.begin();
+
+    advance(it, index);
+
+    this->setFrequency(*it);
+}
+
 int CRTL_TCP_Client::getFrequency() const
 {
     return frequency;

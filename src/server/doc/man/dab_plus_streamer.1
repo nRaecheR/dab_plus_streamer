@@ -28,7 +28,7 @@ Dump programme to <programme_name.msc> file.
 .SS "Web server mode:"
 .TP
 \fB\-w\fR port
-Enable web server on port <port>.
+Enable web server on port <port>. Default: 7979
 .TP
 \fB\-U\fR url
 The url where the dab plus server is accessible from.
@@ -53,7 +53,7 @@ Set input driver and arguments.
 Please note that some input drivers are available only if
 they were enabled at build time.
 Possible values are: auto (default), airspy, rtl_sdr,
-android_rtl_sdr, rtl_tcp, soapysdr.
+rtl_tcp, soapysdr.
 With "rtl_tcp", host IP and port can be specified as
 "rtl_tcp,<HOST_IP>:<PORT>".
 With "rtl_sdr", serial number of the device can be specified as

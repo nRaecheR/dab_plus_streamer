@@ -85,6 +85,12 @@ void CRAWFile::setFrequency(int Frequency)
     (void)Frequency;
 }
 
+void CRAWFile::setFrequencies(std::list<int> frequencies, int index)
+{
+    (void)frequencies;
+    (void)index;
+}
+
 int CRAWFile::getFrequency() const
 {
     return 0;

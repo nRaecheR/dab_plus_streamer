@@ -281,7 +281,7 @@ static void usage()
     "                  Please note that some input drivers are available only if" << endl <<
     "                  they were enabled at build time." << endl <<
     "                  Possible values are: auto (default), airspy, rtl_sdr," << endl <<
-    "                  android_rtl_sdr, rtl_tcp, soapysdr." << endl <<
+    "                  rtl_tcp, soapysdr." << endl <<
     "                  With \"rtl_tcp\", host IP and port can be specified as " << endl <<
     "                  \"rtl_tcp,<HOST_IP>:<PORT>\"." << endl <<
     "                  With \"rtl_sdr\", serial number of the device can be specified as " << endl <<
@@ -498,6 +498,8 @@ int main(int argc, char **argv)
         }
     }
 
+    list<int> freqs;
+
     // Check given channel list for valid IDs/frequencies
     for (const auto& channel: options.channels) {
 
@@ -507,11 +509,14 @@ int main(int argc, char **argv)
             return 1;
         }
 
+        freqs.push_back(freq);
+
         cout << "ARG: Channel=" << channel << ", Frequency=" << freq << endl;
     }
 
-    auto freq = channels.getFrequency(options.channels.front());
-    in->setFrequency(freq);
+    // Add list of (valid) frequencies to input device
+    in->setFrequencies(freqs);
+
     string service_to_tune = options.programme;
 
     if (not options.tests.empty()) {

@@ -98,9 +98,6 @@ CVirtualInput *CInputFactory::GetDevice(RadioControllerInterface &radioControlle
 #ifdef HAVE_LIMESDR
         case CDeviceID::LIMESDR: InputDevice = new CLimeSDR(radioController); break;
 #endif
-#ifdef __ANDROID__
-        case CDeviceID::ANDROID_RTL_SDR: InputDevice = new CAndroid_RTL_SDR(radioController); break;
-#endif
         case CDeviceID::NULLDEVICE: InputDevice = new CNullDevice(); break;
         default: throw std::runtime_error("unknown device ID " + std::string(__FILE__) +":"+ std::to_string(__LINE__));
         }
@@ -137,9 +134,6 @@ CVirtualInput* CInputFactory::GetAutoDevice(RadioControllerInterface& radioContr
 #endif
 #ifdef HAVE_SOAPYSDR
             case 2: inputDevice = new CSoapySdr(radioController); break;
-#endif
-#ifdef __ANDROID__
-            case 3: inputDevice = new CAndroid_RTL_SDR(radioController); break;
 #endif
             }
         }
@@ -182,11 +176,6 @@ CVirtualInput* CInputFactory::GetManualDevice(RadioControllerInterface& radioCon
 #ifdef HAVE_LIMESDR
         if (device == "limesdr")
             InputDevice = new CLimeSDR(radioController);
-        else
-#endif
-#ifdef __ANDROID__
-        if (device == "android_rtl_sdr")
-            InputDevice = new CAndroid_RTL_SDR(radioController);
         else
 #endif
         if (device == "rawfile")
