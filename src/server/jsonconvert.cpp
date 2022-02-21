@@ -121,6 +121,7 @@ static void to_json(nlohmann::json& j, const ComponentJson& c) {
 static void to_json(nlohmann::json& j, const ServiceJson& s) {
     j = nlohmann::json{
         {"sid", s.sid},
+        {"channel", s.channel},
         {"programType", s.programType},
         {"ptystring", s.ptystring},
         {"language", s.language},
