@@ -621,6 +621,8 @@ bool WebRadioInterface::send_mux_json(Socket& s)
         mux_json.ensemble.id = to_hex(rx->getEnsembleId(), 4);
         mux_json.ensemble.ecc = to_hex(rx->getEnsembleEcc(), 2);
 
+        bool add_service = false;
+
         for (const auto& s : rx->getServiceList()) {
             ServiceJson service;
             service.sid = to_hex(s.serviceId, 4);
@@ -654,6 +656,9 @@ bool WebRadioInterface::send_mux_json(Socket& s)
                             string urlmp3 = "/mp3/" + to_hex(s.serviceId, 4);
                             service.url_mp3 = urlmp3;
                         }
+
+                        add_service = true;
+
                         break;
                     case TransportMode::FIDC:
                         component.transportmode = "fidc";
@@ -716,7 +721,8 @@ bool WebRadioInterface::send_mux_json(Socket& s)
                 service.mode = "invalid";
             }
 
-            mux_json.services.push_back(move(service));
+            if(add_service)
+                mux_json.services.push_back(move(service));
         }
     }
 
