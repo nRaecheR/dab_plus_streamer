@@ -265,7 +265,7 @@ void Tests::test_with_noise_iteration(double stddev)
     while (not service_selected) {
         this_thread::sleep_for(chrono::seconds(1));
 
-        for (const auto service : rx.getServiceList()) {
+        for (const auto& service : rx.getServiceList()) {
             if (rx.playSingleProgramme(tph, dumpFileName, service) == false) {
                 cerr << "Tune to " << service.serviceLabel.utf8_label() << " failed" << endl;
             }
@@ -335,7 +335,7 @@ void Tests::test_multipath(int test_id)
     while (not service_selected) {
         this_thread::sleep_for(chrono::seconds(1));
 
-        for (const auto service : rx.getServiceList()) {
+        for (const auto& service : rx.getServiceList()) {
             if (rx.playSingleProgramme(tph, dumpFileName, service) == false) {
                 cerr << "Tune to " << service.serviceLabel.utf8_label() << " failed" << endl;
             }
