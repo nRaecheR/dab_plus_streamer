@@ -654,7 +654,7 @@ bool WebRadioInterface::send_mux_json(Socket& s)
                         if (sc.audioType() == AudioServiceComponentType::DAB or
                             sc.audioType() == AudioServiceComponentType::DABPlus) {
                             string urlmp3 = "/mp3/" + to_hex(s.serviceId, 4);
-                            service.url_mp3 = urlmp3;
+                            service.url_mp3 = serverUrl + urlmp3;
                         }
 
                         add_service = true;
