@@ -468,27 +468,24 @@ int main(int argc, char **argv)
         }
     }
 
-    list<int> freqs;
+    list<struct channel_info> freqs;
 
     // Check given channel list for valid IDs/frequencies
     for (const auto& channel: options.channels) {
 
-        auto freq = channels.getFrequency(channel);
-        if(0 == freq) {
+        struct channel_info info;
+
+        info.name = channel;
+        info.frequency = channels.getFrequency(channel);
+        if(0 == info.frequency) {
             cerr << "Invalid channel ID given" << endl;
             return 1;
         }
 
-        freqs.push_back(freq);
+        freqs.push_back(info);
 
-        cout << "ARG: Channel=" << channel << ", Frequency=" << freq << endl;
+        cout << "ARG: Channel=" << info.name << ", Frequency=" << info.frequency << endl;
     }
-
-    // Tune to first channel
-    auto it = freqs.begin();
-    in->setFrequency(*it);
-
-    string service_to_tune = options.programme;
 
     if (options.web_port != -1) {
         using DS = WebRadioInterface::DecodeStrategy;
@@ -498,9 +495,23 @@ int main(int argc, char **argv)
         }
 
         WebRadioInterface wri(*in, options.web_port, options.web_url, ds, options.rro);
+
+        // Perform scan of channels for services
+        wri.scan(freqs);
+
+        // Start webserver
         wri.serve();
     }
     else {
+
+        // Tune to first channel
+        auto it = freqs.begin();
+
+        auto info = *it;
+        in->setFrequency(info.frequency);
+
+        string service_to_tune = options.programme;
+
         RadioReceiver rx(ri, *in, options.rro);
         if (options.decode_all_programmes) {
             FILE* fic_fd = fopen("dump.fic", "w");

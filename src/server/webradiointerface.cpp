@@ -288,6 +288,72 @@ void WebRadioInterface::retune(const std::string& channel)
     }
 }
 
+void WebRadioInterface::scan(std::list<struct channel_info>& channel_infos){
+
+    cerr << "SCAN: Begin scanning channels" << endl;
+
+    cerr << "SCAN Take ownership of RX" << endl;
+    {
+        cerr << "SCAN Keep RX, don't destroy" << endl;
+
+        // Tune to all given channels and scan for services
+        for (auto& info : channel_infos) {
+
+            cerr << "SCAN Wait for PHT" << endl;
+            running = false;
+            if (programme_handler_thread.joinable()) {
+                programme_handler_thread.join();
+            }
+            {
+            unique_lock<mutex> lock(rx_mut);
+
+                // Even though it would be ok for rx to be inexistent here,
+                // we check to uncover errors.
+                ASSERT_RX;
+
+                cerr << "SCAN data_lock" << endl;
+                {
+                    lock_guard<mutex> data_lock(data_mut);
+                    last_dateTime = {};
+                    last_snr = 0;
+                    last_fine_correction = 0;
+                    last_coarse_correction = 0;
+                }
+
+                cerr << "SCAN sync=false" << endl;
+
+                synced = false;
+
+                cerr << "SCAN fib_lock" << endl;
+                {
+                    lock_guard<mutex> fib_lock(fib_mut);
+                    num_fic_crc_errors = 0;
+                }
+                cerr << "SCAN tiis.clear" << endl;
+                tiis.clear();
+
+                cerr << "SCAN setChannel" << endl;
+                rx->setChannel(info.name);
+                cerr << "SCAN Set frequency for channel " << info.name << endl;
+                input.setFrequency(info.frequency);
+
+                cerr << "SCAN Input Reset" << endl;
+                input.reset(); // Clear buffer
+
+                //TODO: Replace it with a non-modified function
+                cerr << "SCAN RX Restart" << endl;
+                rx->restart(false);
+            }
+
+            cerr << "SCAN Start programme handler" << endl;
+            running = true;
+            programme_handler_thread = thread(&WebRadioInterface::handle_phs, this);
+
+            this_thread::sleep_for(chrono::seconds(5));
+        }
+    }
+}
+
 static string recv_line(Socket& s) {
     string line;
     bool cr_seen = false;

@@ -49,6 +49,11 @@
 class CVirtualInput; // from input/virtual_input.h
 class RadioReceiver; // from backend/radio_receiver.h
 
+struct channel_info {
+    std::string name;
+    int frequency;
+};
+
 class WebRadioInterface : public RadioControllerInterface {
     public:
         enum class DecodeStrategy {
@@ -72,6 +77,9 @@ class WebRadioInterface : public RadioControllerInterface {
         ~WebRadioInterface();
         WebRadioInterface(const WebRadioInterface&) = delete;
         WebRadioInterface& operator=(const WebRadioInterface&) = delete;
+
+        // Perform a scan for services for the given channel list
+        void scan(std::list<struct channel_info>& channel_infos);
 
         void serve();
 

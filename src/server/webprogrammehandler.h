@@ -69,6 +69,7 @@ struct Lame {
     }
 };
 
+
 enum class MOTType { JPEG, PNG, Unknown };
 
 
