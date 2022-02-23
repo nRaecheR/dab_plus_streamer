@@ -143,6 +143,11 @@ bool RadioReceiver::removeServiceToDecode(const Service& s)
     return false;
 }
 
+void RadioReceiver::setChannel(std::string channel)
+{
+    ficHandler.setChannel(channel);
+}
+
 bool RadioReceiver::playProgramme(ProgrammeHandlerInterface& handler,
         const Service& s, const std::string& dumpFileName, bool unique)
 {

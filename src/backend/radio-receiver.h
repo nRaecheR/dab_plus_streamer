@@ -80,6 +80,8 @@ class RadioReceiver {
 
         bool removeServiceToDecode(const Service& s);
 
+        void setChannel(std::string channel);
+
         uint16_t getEnsembleId(void) const;
         uint8_t getEnsembleEcc(void) const;
         DabLabel getEnsembleLabel(void) const;

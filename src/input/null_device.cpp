@@ -35,12 +35,6 @@ void CNullDevice::setFrequency(int Frequency)
     (void) Frequency;
 }
 
-void CNullDevice::setFrequencies(std::list<int> frequencies, int index)
-{
-    (void) frequencies;
-    (void) index;
-}
-
 int CNullDevice::getFrequency(void) const
 {
     return 0;

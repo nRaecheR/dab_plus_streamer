@@ -145,17 +145,6 @@ void CRTL_SDR::setFrequency(int frequency)
     restart();
 }
 
-void CRTL_SDR::setFrequencies(std::list<int> frequencies, int index)
-{
-    this->frequencies = frequencies;
-
-    auto it = this->frequencies.begin();
-
-    advance(it, index);
-
-    this->setFrequency(*it);
-}
-
 int CRTL_SDR::getFrequency(void) const
 {
     return frequency;

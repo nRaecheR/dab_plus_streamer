@@ -46,7 +46,6 @@ public:
     CSoapySdr operator=(const CSoapySdr&) = delete;
 
     virtual void setFrequency(int Frequency);
-    virtual void setFrequencies(std::list<int> frequencies, int index = 0);
     virtual int getFrequency(void) const;
     virtual bool restart(void);
     virtual bool is_ok(void);
@@ -71,7 +70,6 @@ private:
     void increaseGain();
 
     RadioControllerInterface& radioController;
-    std::list<int> frequencies;
     int m_freq = 0;
     std::string m_driver_args;
     std::string m_antenna;

@@ -54,6 +54,8 @@ class FIBProcessor {
         Subchannel getSubchannel(const ServiceComponent& sc) const;
         std::chrono::system_clock::time_point getTimeLastFCT0Frame() const;
 
+        void setChannel(std::string ch);
+
     private:
         RadioControllerInterface& myRadioInterface;
         Service *findServiceId(uint32_t serviceId);
@@ -132,6 +134,7 @@ class FIBProcessor {
         std::unordered_map<uint32_t, uint8_t> serviceRepeatCount;
         std::chrono::steady_clock::time_point timeLastServiceDecrement;
         std::chrono::system_clock::time_point timeLastFCT0Frame;
+        std::string channel;
 };
 
 #endif

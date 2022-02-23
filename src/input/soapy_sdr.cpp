@@ -79,17 +79,6 @@ void CSoapySdr::setFrequency(int Frequency)
     }
 }
 
-void CSoapySdr::setFrequencies(std::list<int> frequencies, int index)
-{
-    this->frequencies = frequencies;
-
-    auto it = this->frequencies.begin();
-
-    advance(it, index);
-
-    this->setFrequency(*it);
-}
-
 int CSoapySdr::getFrequency() const
 {
     return m_freq;

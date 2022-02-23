@@ -34,7 +34,6 @@ public:
     CNullDevice();
 
     void setFrequency(int Frequency);
-    void setFrequencies(std::list<int> frequencies, int index = 0);
     int getFrequency(void) const;
     bool restart(void);
     bool is_ok(void);

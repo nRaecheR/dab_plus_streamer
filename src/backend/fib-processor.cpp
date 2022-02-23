@@ -1142,6 +1142,8 @@ void FIBProcessor::bindAudioService(
     Service *s = findServiceId(SId);
     if (!s) return;
 
+    s->channel = channel; //TODO: Do it during adding of service 
+
     if (std::find_if(components.begin(), components.end(),
                 [&](const ServiceComponent& sc) {
                     return sc.SId == s->serviceId && sc.componentNr == compnr;
@@ -1335,4 +1337,9 @@ std::chrono::system_clock::time_point FIBProcessor::getTimeLastFCT0Frame() const
 {
     std::lock_guard<std::mutex> lock(mutex);
     return timeLastFCT0Frame;
+}
+
+void FIBProcessor::setChannel(std::string ch)
+{
+    channel=ch;
 }

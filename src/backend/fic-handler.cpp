@@ -239,3 +239,8 @@ int FicHandler::getFicDecodeRatioPercent()
     return fic_decode_success_ratio * 10;
 }
 
+void FicHandler::setChannel(std::string ch)
+{
+    fibProcessor.setChannel(ch);
+}
+

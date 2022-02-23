@@ -484,8 +484,9 @@ int main(int argc, char **argv)
         cout << "ARG: Channel=" << channel << ", Frequency=" << freq << endl;
     }
 
-    // Add list of (valid) frequencies to input device
-    in->setFrequencies(freqs);
+    // Tune to first channel
+    auto it = freqs.begin();
+    in->setFrequency(*it);
 
     string service_to_tune = options.programme;
 

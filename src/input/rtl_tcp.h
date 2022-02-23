@@ -57,7 +57,6 @@ public:
 
     // Interface methods
     void setFrequency(int);
-    void setFrequencies(std::list<int> frequencies, int index = 0);
     int getFrequency(void) const;
     bool restart(void);
     bool is_ok(void);
@@ -93,7 +92,6 @@ private:
     std::thread agcThread;
     std::thread networkBufferThread;
 
-    std::list<int> frequencies;
     float currentGain = 0;
     uint16_t currentGainCount = 0;
     uint8_t minAmplitude = 255;
