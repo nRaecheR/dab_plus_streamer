@@ -454,7 +454,7 @@ bool WebRadioInterface::dispatch_client(Socket&& client)
             else if (req.url == "/mux.json") {
                 success = send_mux_json(s);
             }
-            else if (req.url == "/stream.m3u") {
+            else if (req.url == "/streams.m3u") {
                 success = send_mux_playlist(s);
             }
             else if (req.url == "/channel") {
@@ -744,7 +744,7 @@ bool WebRadioInterface::send_mux_playlist(Socket& s)
     const auto m3u_str = m3u.str();
     ssize_t ret = s.send(m3u_str.c_str(), m3u_str.size(), MSG_NOSIGNAL);
     if (ret == -1) {
-        cerr << "Failed to send mux.m3u data" << endl;
+        cerr << "Failed to send streams.m3u data" << endl;
         return false;
     }
     return true;
