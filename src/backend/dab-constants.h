@@ -122,6 +122,8 @@ struct Service {
 
     uint32_t serviceId = 0;
 
+    std::string channel;
+
     DabLabel serviceLabel;
     int16_t  language = 0;
     int16_t  programType = 0; // PTy, FIG0/17

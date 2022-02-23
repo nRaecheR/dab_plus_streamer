@@ -47,10 +47,8 @@
 #include <rtl_tcp.h>
 #include <rtl_sdr.h>
 #include "server/webradiointerface.h"
-#include "server/tests.h"
 #include "backend/radio-receiver.h"
 #include "input/input_factory.h"
-#include "input/raw_file.h"
 #include "various/channels.h"
 #include "libs/json.hpp"
 extern "C" {
@@ -241,7 +239,6 @@ struct options_t {
     bool decode_all_programmes = false;
     string web_url = "";
     int web_port = 7979; // positive value means enable
-    list<int> tests;
 
     RadioReceiverOptions rro;
 };
@@ -272,10 +269,6 @@ static void usage()
     "                  Example: -U http://localhost:8000" << endl <<
     endl <<
     "Backend and input options:" << endl <<
-    "    -f file       Read an IQ file <file>." << endl <<
-    "                  IQ file format is u8, unless the file ends with 'FORMAT.iq'." << endl <<
-    "    -u            Disable coarse corrector, for receivers who have a low " << endl <<
-    "                  frequency offset." << endl <<
     "    -g gain       Set input gain to <gain> or -1 for auto gain." << endl <<
     "    -F driver     Set input driver and arguments." << endl <<
     "                  Please note that some input drivers are available only if" << endl <<
@@ -288,18 +281,13 @@ static void usage()
     "                  \"rtl_sdr,<serial-no>\"." << endl <<
     "    -s args       SoapySDR Driver arguments." << endl <<
     "    -A antenna    Set input antenna to ANT (for SoapySDR input only)." << endl <<
-    "    -T            Disable TII decoding to reduce CPU usage." << endl <<
+    "    -T            Enable TII decoding, increases CPU usage." << endl <<
     endl <<
     "Other options:" << endl <<
-    "    -t test_id    Run test <test_id>." << endl <<
-    "                  To understand what the tests do, please see source code." << endl <<
     "    -h            Display this help and exit." << endl <<
     "    -v            Output version information and exit." << endl <<
     endl <<
     "Examples:" << endl <<
-    endl <<
-    "dab_plus_streamer -f ./ofdm.iq -t 1" << endl <<
-    "    Read IQ file './ofdm.iq' (in u8 format), and run test 1." << endl <<
     endl <<
     "dab_plus_streamer -c 10B -p GRRIF -F rtl_tcp,localhost:1234" << endl <<
     "    Receive 'GRRIF' on channel '10B' using 'rtl_tcp' driver on localhost:1234." << endl <<
@@ -338,7 +326,7 @@ options_t parse_cmdline(int argc, char **argv)
     options_t options;
     string fe_opt = "";
     string ch_opt = "";
-    options.rro.decodeTII = true;
+    options.rro.decodeTII = false;
 
     int opt;
     while ((opt = getopt(argc, argv, "A:c:C:dDf:F:g:hp:Ps:Tt:uU:vw:")) != -1) {
@@ -373,11 +361,8 @@ options_t parse_cmdline(int argc, char **argv)
             case 's':
                 options.soapySDRDriverArgs = optarg;
                 break;
-            case 't':
-                options.tests.push_back(std::atoi(optarg));
-                break;
             case 'T':
-                options.rro.decodeTII = false;
+                options.rro.decodeTII = true;
                 break;
             case 'v':
                 version();
@@ -440,28 +425,13 @@ int main(int argc, char **argv)
 
     unique_ptr<CVirtualInput> in = nullptr;
 
-    if (options.iqsource.empty()) {
-        in.reset(CInputFactory::GetDevice(ri, options.frontend, options.frontend_args));
+    in.reset(CInputFactory::GetDevice(ri, options.frontend, options.frontend_args));
 
-        if (not in) {
-            cerr << "Could not start device" << endl;
-            return 1;
-        }
+    if (not in) {
+        cerr << "Could not start device" << endl;
+        return 1;
     }
-    else {
-        // Run the tests without input throttling for max speed
-        const bool throttle = options.tests.empty();
-        const bool rewind = options.tests.empty();
-        auto in_file = make_unique<CRAWFile>(ri, throttle, rewind);
-        if (not in_file) {
-            cerr << "Could not prepare CRAWFile" << endl;
-            return 1;
-        }
-
-        in_file->setFileName(options.iqsource, "auto");
-        in = move(in_file);
-    }
-
+    
     if (options.gain == -1) {
         in->setAgc(true);
     }
@@ -519,13 +489,7 @@ int main(int argc, char **argv)
 
     string service_to_tune = options.programme;
 
-    if (not options.tests.empty()) {
-        Tests tests(in, options.rro);
-        for (int test : options.tests) {
-            tests.run_test(test);
-        }
-    }
-    else if (options.web_port != -1) {
+    if (options.web_port != -1) {
         using DS = WebRadioInterface::DecodeStrategy;
         WebRadioInterface::DecodeSettings ds;
         if (options.decode_all_programmes) {

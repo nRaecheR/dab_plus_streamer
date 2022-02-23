@@ -121,13 +121,11 @@ set(server_sources
     src/server/webradiointerface.cpp
     src/server/jsonconvert.cpp
     src/server/webprogrammehandler.cpp
-    src/server/tests.cpp
 )
 
 set(input_sources
     src/input/input_factory.cpp
     src/input/null_device.cpp
-    src/input/raw_file.cpp
     src/input/rtl_tcp.cpp
 )
 

@@ -117,21 +117,6 @@ class WebRadioInterface : public RadioControllerInterface {
         // in decimal
         bool send_slide(Socket& s, const std::string& stream);
 
-        // Send the Fast Information Channel as a stream.
-        // Every FIB is 32 bytes long, there three FIBs per 24ms interval,
-        // which gives 32000 bits/s
-        bool send_fic(Socket& s);
-
-        // Send the impulse response, in dB, as a sequence of float values.
-        bool send_impulseresponse(Socket& s);
-
-        // Send the signal spectrum, in dB, as a sequence of float values.
-        bool send_spectrum(Socket& s);
-        bool send_null_spectrum(Socket& s);
-
-        // Send the constellation points, a sequence of phases between -180 and 180 .
-        bool send_constellation(Socket& s);
-
         // Send the currently tuned channel
         bool send_channel(Socket& s);
 

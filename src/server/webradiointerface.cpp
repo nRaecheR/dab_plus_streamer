@@ -85,8 +85,6 @@ static const char* http_503 = "HTTP/1.0 503 Service Unavailable\r\n";
 static const char* http_contenttype_mp3 = "Content-Type: audio/mpeg\r\n";
 static const char* http_contenttype_m3u = "Content-Type: application/mpegurl\r\n";
 static const char* http_contenttype_text = "Content-Type: text/plain\r\n";
-static const char* http_contenttype_data =
-        "Content-Type: application/octet-stream\r\n";
 
 static const char* http_contenttype_json =
         "Content-Type: application/json; charset=utf-8\r\n";
@@ -251,8 +249,8 @@ void WebRadioInterface::retune(const std::string& channel)
         // we check to uncover errors.
         ASSERT_RX;
 
-        cerr << "RETUNE Destroy RX" << endl;
-        rx.reset();
+        cerr << "RETUNE Keep RX, don't destroy" << endl;
+        //rx.reset();
 
         {
             lock_guard<mutex> data_lock(data_mut);
@@ -275,12 +273,12 @@ void WebRadioInterface::retune(const std::string& channel)
         input.reset(); // Clear buffer
 
         cerr << "RETUNE Restart RX" << endl;
-        rx = make_unique<RadioReceiver>(*this, input, rro);
+        //rx = make_unique<RadioReceiver>(*this, input, rro);
         if (not rx) {
             throw runtime_error("Could not initialise RadioReceiver");
         }
 
-        time_rx_created = chrono::system_clock::now();
+        //time_rx_created = chrono::system_clock::now();
         rx->restart(false);
 
         cerr << "RETUNE Start programme handler" << endl;
@@ -456,23 +454,8 @@ bool WebRadioInterface::dispatch_client(Socket&& client)
             else if (req.url == "/mux.json") {
                 success = send_mux_json(s);
             }
-            else if (req.url == "/mux.m3u") {
+            else if (req.url == "/stream.m3u") {
                 success = send_mux_playlist(s);
-            }
-            else if (req.url == "/fic") {
-                success = send_fic(s);
-            }
-            else if (req.url == "/impulseresponse") {
-                success = send_impulseresponse(s);
-            }
-            else if (req.url == "/spectrum") {
-                success = send_spectrum(s);
-            }
-            else if (req.url == "/constellation") {
-                success = send_constellation(s);
-            }
-            else if (req.url == "/nullspectrum") {
-                success = send_null_spectrum(s);
             }
             else if (req.url == "/channel") {
                 success = send_channel(s);
@@ -557,41 +540,6 @@ bool WebRadioInterface::send_file(Socket& s,
         return send_http_response(s, http_500, "file '" + filename + "' is missing!");
     }
     return false;
-}
-
-static vector<PeakJson> calculate_cir_peaks(const vector<float>& cir_linear)
-{
-    constexpr size_t num_peaks = 6;
-
-    vector<PeakJson> peaks;
-
-    if (not cir_linear.empty()) {
-        vector<float> cir_lin(cir_linear);
-
-        // Every time we find a peak, we attenuate it, including
-        // its surrounding values, and we go search the next peak.
-        for (size_t peak = 0; peak < num_peaks; peak++) {
-            PeakJson p;
-            for (size_t i = 1; i < cir_lin.size(); i++) {
-                if (cir_lin[i] > p.value) {
-                    p.value = cir_lin[i];
-                    p.index = i;
-                }
-            }
-
-            const size_t windowsize = 25;
-            for (size_t j = 0; j < windowsize; j++) {
-                const ssize_t i = p.index + j - windowsize/2;
-                if (i >= 0 and i < (ssize_t)cir_lin.size()) {
-                    cir_lin[i] *= 0;
-                }
-            }
-
-            peaks.push_back(move(p));
-        }
-    }
-
-    return peaks;
 }
 
 bool WebRadioInterface::send_mux_json(Socket& s)
@@ -736,45 +684,9 @@ bool WebRadioInterface::send_mux_json(Socket& s)
         mux_json.utctime.minutes = last_dateTime.minutes;
         mux_json.utctime.lto = last_dateTime.hourOffset + ((double)last_dateTime.minuteOffset / 30.0);
 
-        for (const auto& message : pending_messages) {
-            using namespace chrono;
-
-            stringstream ss;
-
-            const auto millisec_dur = duration_cast<milliseconds>(
-                    message.timestamp.time_since_epoch());
-
-            const auto sec_dur = duration_cast<seconds>(millisec_dur);
-            const std::time_t t = sec_dur.count();
-            const std::size_t fractional_seconds = millisec_dur.count() % 1000;
-
-            ss << std::ctime(&t) << "." << fractional_seconds;
-
-            switch (message.level) {
-                case message_level_t::Information:
-                    ss << " INFO : ";
-                    break;
-                case message_level_t::Error:
-                    ss << " ERROR: ";
-                    break;
-            }
-
-            ss << message.text;
-            mux_json.messages.push_back(ss.str());
-        }
-
-        pending_messages.clear();
-
         mux_json.demodulator_snr = last_snr;
         mux_json.demodulator_frequencycorrection = last_fine_correction + last_coarse_correction;
         mux_json.demodulator_timelastfct0frame = rx->getReceiverStats().timeLastFCT0Frame;
-
-        mux_json.tii = getTiiStats();
-    }
-
-    {
-        lock_guard<mutex> lock(plotdata_mut);
-        mux_json.cir_peaks = calculate_cir_peaks(last_CIR);
     }
 
     if (not send_http_response(s, http_ok, "", http_contenttype_json)) {
@@ -932,152 +844,6 @@ bool WebRadioInterface::send_slide(Socket& s, const std::string& stream)
             return true;
         }
     }
-    return false;
-}
-
-bool WebRadioInterface::send_fic(Socket& s)
-{
-    if (not send_http_response(s, http_ok, "", http_contenttype_data)) {
-        cerr << "Failed to send FIC headers" << endl;
-        return false;
-    }
-
-    while (true) {
-        unique_lock<mutex> lock(fib_mut);
-        while (fib_blocks.empty()) {
-            new_fib_block_available.wait_for(lock, chrono::seconds(1));
-        }
-        ssize_t ret = s.send(fib_blocks.front().data(),
-                fib_blocks.front().size(), MSG_NOSIGNAL);
-        if (ret == -1) {
-            cerr << "Failed to send FIC data" << endl;
-            return false;
-        }
-
-        fib_blocks.pop_front();
-    }
-    return true;
-}
-
-bool WebRadioInterface::send_impulseresponse(Socket& s)
-{
-    if (not send_http_response(s, http_ok, "", http_contenttype_data)) {
-        cerr << "Failed to send CIR headers" << endl;
-        return false;
-    }
-
-    lock_guard<mutex> lock(plotdata_mut);
-    vector<float> cir_db(last_CIR.size());
-    std::transform(last_CIR.begin(), last_CIR.end(), cir_db.begin(),
-            [](float y) { return 10.0f * log10(y); });
-
-    size_t lengthBytes = cir_db.size() * sizeof(float);
-    ssize_t ret = s.send(cir_db.data(), lengthBytes, MSG_NOSIGNAL);
-    if (ret == -1) {
-        cerr << "Failed to send CIR data" << endl;
-        return false;
-    }
-
-    return true;
-}
-
-static bool send_fft_data(Socket& s, DSPCOMPLEX *spectrumBuffer, size_t T_u)
-{
-    vector<float> spectrum(T_u);
-
-    // Shift FFT samples
-    const size_t half_Tu = T_u / 2;
-    for (size_t i = 0; i < half_Tu; i++) {
-        spectrum[i] = abs(spectrumBuffer[i + half_Tu]);
-    }
-    for (size_t i = half_Tu; i < T_u; i++) {
-        spectrum[i] = abs(spectrumBuffer[i - half_Tu]);
-    }
-
-    if (not send_http_response(s, http_ok, "", http_contenttype_data)) {
-        cerr << "Failed to send spectrum headers" << endl;
-        return false;
-    }
-
-    size_t lengthBytes = spectrum.size() * sizeof(float);
-    ssize_t ret = s.send(spectrum.data(), lengthBytes, MSG_NOSIGNAL);
-    if (ret == -1) {
-        cerr << "Failed to send spectrum data" << endl;
-        return false;
-    }
-
-    return true;
-}
-
-bool WebRadioInterface::send_spectrum(Socket& s)
-{
-    // Get FFT buffer
-    DSPCOMPLEX* spectrumBuffer = spectrum_fft_handler.getVector();
-    auto samples = input.getSpectrumSamples(dabparams.T_u);
-
-    // Continue only if we got data
-    if (samples.size() != (size_t)dabparams.T_u)
-        return false;
-
-    std::copy(samples.begin(), samples.end(), spectrumBuffer);
-
-    // Do FFT to get the spectrum
-    spectrum_fft_handler.do_FFT();
-
-    return send_fft_data(s, spectrumBuffer, dabparams.T_u);
-}
-
-bool WebRadioInterface::send_null_spectrum(Socket& s)
-{
-    // Get FFT buffer
-    DSPCOMPLEX* spectrumBuffer = spectrum_fft_handler.getVector();
-
-    lock_guard<mutex> lock(plotdata_mut);
-    if (last_NULL.empty()) {
-        return false;
-    }
-    else if (last_NULL.size() != (size_t)dabparams.T_null) {
-        cerr << "Invalid NULL size " << last_NULL.size() << endl;
-        return false;
-    }
-
-    copy(last_NULL.begin(), last_NULL.begin() + dabparams.T_u, spectrumBuffer);
-
-    // Do FFT to get the spectrum
-    spectrum_fft_handler.do_FFT();
-
-    return send_fft_data(s, spectrumBuffer, dabparams.T_u);
-}
-
-bool WebRadioInterface::send_constellation(Socket& s)
-{
-    const size_t decim = OfdmDecoder::constellationDecimation;
-    const size_t num_iqpoints = (dabparams.L-1) * dabparams.K / decim;
-    std::vector<float> phases(num_iqpoints);
-
-    lock_guard<mutex> lock(plotdata_mut);
-    if (last_constellation.size() == num_iqpoints) {
-        phases.resize(num_iqpoints);
-        for (size_t i = 0; i < num_iqpoints; i++) {
-            const float y = 180.0f / (float)M_PI * std::arg(last_constellation[i]);
-            phases[i] = y;
-        }
-
-        if (not send_http_response(s, http_ok, "", http_contenttype_data)) {
-            cerr << "Failed to send constellation headers" << endl;
-            return false;
-        }
-
-        size_t lengthBytes = phases.size() * sizeof(float);
-        ssize_t ret = s.send(phases.data(), lengthBytes, MSG_NOSIGNAL);
-        if (ret == -1) {
-            cerr << "Failed to send constellation data" << endl;
-            return false;
-        }
-
-        return true;
-    }
-
     return false;
 }
 
@@ -1403,52 +1169,11 @@ void WebRadioInterface::onFIBDecodeSuccess(bool crcCheckOk, const uint8_t* fib)
     new_fib_block_available.notify_one();
 }
 
-void WebRadioInterface::onNewImpulseResponse(std::vector<float>&& data)
-{
-    lock_guard<mutex> lock(plotdata_mut);
-    last_CIR = move(data);
-}
-
-void WebRadioInterface::onNewNullSymbol(std::vector<DSPCOMPLEX>&& data)
-{
-    lock_guard<mutex> lock(plotdata_mut);
-    last_NULL = move(data);
-}
-
-void WebRadioInterface::onConstellationPoints(std::vector<DSPCOMPLEX>&& data)
-{
-    lock_guard<mutex> lock(plotdata_mut);
-    last_constellation = move(data);
-}
-
-void WebRadioInterface::onMessage(message_level_t level, const std::string& text, const std::string& text2)
-{
-    std::string fullText;
-    if (text2.empty())
-        fullText = text;
-    else
-        fullText = text + text2;
-    
-    lock_guard<mutex> lock(data_mut);
-    const auto now = std::chrono::system_clock::now();
-    pending_message_t m = { .level = level, .text = fullText, .timestamp = now};
-    pending_messages.emplace_back(move(m));
-
-    if (pending_messages.size() > MAX_PENDING_MESSAGES) {
-        pending_messages.pop_front();
-    }
-}
-
-void WebRadioInterface::onTIIMeasurement(tii_measurement_t&& m)
-{
-    lock_guard<mutex> lock(data_mut);
-    auto& l = tiis[make_pair(m.comb, m.pattern)];
-    l.push_back(move(m));
-
-    if (l.size() > 20) {
-        l.pop_front();
-    }
-}
+void WebRadioInterface::onNewImpulseResponse(std::vector<float>&& data) { }
+void WebRadioInterface::onNewNullSymbol(std::vector<DSPCOMPLEX>&& data) { }
+void WebRadioInterface::onConstellationPoints(std::vector<DSPCOMPLEX>&& data) { }
+void WebRadioInterface::onMessage(message_level_t level, const std::string& text, const std::string& text2) { }
+void WebRadioInterface::onTIIMeasurement(tii_measurement_t&& m) { }
 
 void WebRadioInterface::onInputFailure()
 {

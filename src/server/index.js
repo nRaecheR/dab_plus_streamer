@@ -19,26 +19,6 @@ window.onload = function() {
     var chevron_down = '<img width=24 height=24 src="data:image/png;base64,' +
         png_chevron_down + '" />';
 
-    var spectrum_block = document.getElementById('block_spectrum');
-    spectrum_block.getElementsByClassName('title')[0]
-        .getElementsByClassName('chevron')[0]
-        .innerHTML = chevron_right;
-
-    var cir_block = document.getElementById('block_cir');
-    cir_block.getElementsByClassName('title')[0]
-        .getElementsByClassName('chevron')[0]
-        .innerHTML = chevron_right;
-
-    var constellation_block = document.getElementById('block_constellation');
-    constellation_block.getElementsByClassName('title')[0]
-        .getElementsByClassName('chevron')[0]
-        .innerHTML = chevron_right;
-
-    var tii_block = document.getElementById('block_tii');
-    tii_block.getElementsByClassName('title')[0]
-        .getElementsByClassName('chevron')[0]
-        .innerHTML = chevron_right;
-
     toggle_func = function(block) {
         var fold = block.getElementsByClassName('title')[0]
             .getElementsByClassName('chevron')[0];
@@ -54,35 +34,6 @@ window.onload = function() {
             return true;
         }
     };
-
-    spectrum_block.onclick = function() {
-        if (toggle_func(spectrum_block)) {
-            populateSpectrumPlots(480);
-        }
-        else {
-            clearInterval(plotSpectrumTimer);
-        }
-    };
-
-    cir_block.onclick = function() {
-        if (toggle_func(cir_block)) {
-            populateCIRPlots(480);
-        }
-        else {
-            clearInterval(plotCIRTimer);
-        }
-    };
-
-    constellation_block.onclick = function() {
-        if (toggle_func(constellation_block)) {
-            populateConstellationPlots(480);
-        }
-        else {
-            clearInterval(plotConstellationTimer);
-        }
-    };
-
-    tii_block.onclick = function() { toggle_func(tii_block); };
 
     var ch = document.getElementById("channelselector");
 
@@ -148,7 +99,7 @@ function ensembleInfoTemplate() {
     var html = '';
     html += ' <h1><abbr title="Ensemble long and short labels defined in FIG1">${label} (${shortlabel})</abbr></h1>';
     html += ' <h2><abbr title="Ensemble long and short labels defined in FIG2">${fig2label}</abbr></h2>';
-    html += ' <div align="right"><p><abbr title="${hw_name}, ${sw_name}">This is DAB Plus Streamer build version ${version}</abbr></p></div>';
+    html += ' <div align="right"><p><abbr title="${hw_name}, ${sw_name}">DAB Plus Streamer build version ${version}</abbr></p></div>';
     html += ' <table id="servicetable">';
     html += ' <tr><th>Ensemble ID </th>';
     html += ' <th>ECC </th>';
@@ -244,22 +195,6 @@ function parseTemplate(template, data) {
 
      return match;
    });
-}
-
-function drawCIRPeaks(cirs) {
-    var canvas = document.getElementById("cirpeaks");
-    var ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle="#BBFF77";
-    ctx.font="8px Helvetica";
-
-    var i = 0;
-    for (cir in cirs) {
-        var h = 10 + 3*(i % 3);
-        ctx.fillText(i, cirs[cir].index/4, h);
-        i++;
-    }
 }
 
 function drawAudiolevels(services) {
@@ -447,139 +382,3 @@ function populateEnsembleinfo() {
     r.open("GET", "/mux.json", true);
     r.send()
 };
-
-function plot(data, id, scalefactor, shiftfactor, plot_ix) {
-    var canvas = document.getElementById(id);
-    var ctx = canvas.getContext("2d");
-    if (plot_ix == 0) {
-        ctx.fillStyle = "#111100";
-        ctx.fillRect(0,0,data.length,150);
-    }
-
-    ctx.beginPath();
-    colors = ["#FF4444", "#33FF55", "#778800"];
-    if (plot_ix < colors.length) {
-        ctx.strokeStyle=colors[plot_ix];
-    }
-    else {
-        ctx.strokeStyle=colors[0];
-    }
-    var dataMax = 0;
-    var dataMin = 1000;
-    for (var i = 0; i < data.length; i++) {
-        var dataScaled = 170-scalefactor*(data[i] + shiftfactor);
-
-        if (dataMax < dataScaled) {
-            dataMax = dataScaled;
-        }
-
-        if (dataMin > dataScaled) {
-            dataMin = dataScaled;
-        }
-
-        if (i % 4 == 0) {
-            ctx.moveTo(i/4, dataMin);
-            ctx.lineTo(i/4, dataMax);
-
-            dataMax = 0;
-            dataMin = 1000;
-        }
-    }
-    ctx.stroke();
-};
-
-function populateSpectrumPlots(interval) {
-    populateSpectrum();
-    if (interval > 0) {
-        plotSpectrumTimer = setTimeout(function() { populateSpectrumPlots( interval); }, interval);
-    }
-};
-
-function populateCIRPlots(interval) {
-    populateCIR();
-    if  (interval > 0) {
-        plotCIRTimer = setTimeout(function() { populateCIRPlots( interval); }, interval);
-    }
-};
-
-function populateConstellationPlots(interval) {
-    populateConstellation();
-    if  (interval > 0) {
-        plotConstellationTimer = setTimeout(function() { populateConstellationPlots( interval); }, interval);
-    }
-};
-
-function populateSpectrum() {
-    var r = new XMLHttpRequest();
-    r.onload = function(oEvent) {
-        var arrayBuffer = r.response;
-        if (arrayBuffer) {
-            var spec = new Float32Array(arrayBuffer);
-            plot(spec, "spectrum", 2, 20, 0);
-        }
-
-        r2 = new XMLHttpRequest();
-        r2.onload = function(oEvent) {
-            var arrayBuffer = r2.response;
-            if (arrayBuffer) {
-                var spec = new Float32Array(arrayBuffer);
-                plot(spec, "spectrum", 2, 20, 1);
-            }
-        };
-        r2.open("GET", "/nullspectrum", true);
-        r2.responseType = "arraybuffer";
-        r2.send(null);
-    };
-    r.open("GET", "/spectrum", true);
-    r.responseType = "arraybuffer";
-    r.send(null);
-};
-
-function populateCIR() {
-    var r = new XMLHttpRequest();
-    r.onload = function(oEvent) {
-        var arrayBuffer = r.response;
-        if (arrayBuffer) {
-            var cir = new Float32Array(arrayBuffer);
-            plot(cir, "cir", 4, 30, 0)
-        }
-    };
-    r.open("GET", "/impulseresponse", true);
-    r.responseType = "arraybuffer";
-    r.send(null);
-}
-
-function populateConstellation() {
-    var r = new XMLHttpRequest();
-    r.onload = function(oEvent) {
-        var arrayBuffer = r.response;
-        if (arrayBuffer) {
-            var data = new Float32Array(arrayBuffer);
-
-            var squeeze = 4;
-
-            var canvas = document.getElementById("constellation");
-            var ctx = canvas.getContext("2d");
-            ctx.fillStyle = "#111100";
-            ctx.fillRect(0,0,data.length / squeeze,180);
-
-            ctx.beginPath();
-            ctx.strokeStyle="rgba(255, 100, 0, 0.8)";
-            for (var i = 0; i < data.length; i++) {
-                var x = i / squeeze;
-                var y = (data[i] + 180) / 2;
-                // Draw a little cross
-                ctx.moveTo(x-1, y);
-                ctx.lineTo(x+1, y);
-                ctx.moveTo(x, y-1);
-                ctx.lineTo(x, y+1);
-            }
-            ctx.stroke();
-        }
-    };
-    r.open("GET", "/constellation", true);
-    r.responseType = "arraybuffer";
-    r.send(null);
-}
-
-

@@ -37,14 +37,6 @@ as the prefix\-URL for the M3U playlist.
 Example: \fB\-U\fR http://localhost:8000
 .SS "Backend and input options:"
 .TP
-\fB\-f\fR file
-Read an IQ file <file>.
-IQ file format is u8, unless the file ends with 'FORMAT.iq'.
-.TP
-\fB\-u\fR
-Disable coarse corrector, for receivers who have a low
-frequency offset.
-.TP
 \fB\-g\fR gain
 Set input gain to <gain> or \fB\-1\fR for auto gain.
 .TP
@@ -66,12 +58,8 @@ SoapySDR Driver arguments.
 Set input antenna to ANT (for SoapySDR input only).
 .TP
 \fB\-T\fR
-Disable TII decoding to reduce CPU usage.
+Enable TII decoding, increases CPU usage.
 .SS "Other options:"
-.TP
-\fB\-t\fR test_id
-Run test <test_id>.
-To understand what the tests do, please see source code.
 .TP
 \fB\-h\fR
 Display this help and exit.
@@ -79,10 +67,6 @@ Display this help and exit.
 \fB\-v\fR
 Output version information and exit.
 .SH EXAMPLES
-dab_plus_streamer \-f ./ofdm.iq \-t 1
-.IP
-Read IQ file './ofdm.iq' (in u8 format), and run test 1.
-.PP
 dab_plus_streamer \-c 10B \-p GRRIF \-F rtl_tcp,localhost:1234
 .IP
 Receive 'GRRIF' on channel '10B' using 'rtl_tcp' driver on localhost:1234.

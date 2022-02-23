@@ -192,33 +192,12 @@ static void to_json(nlohmann::json& j, const UTCJson& u) {
     };
 }
 
-static void to_json(nlohmann::json& j, const tii_measurement_t& tii) {
-    j = nlohmann::json{
-        {"comb", tii.comb},
-        {"pattern", tii.pattern},
-        {"delay", tii.delay_samples},
-        {"delay_km", tii.getDelayKm()},
-        {"error", tii.error}
-    };
-}
-
-static void to_json(nlohmann::json& j, const PeakJson& peak)
-{
-    j = nlohmann::json{
-        {"index", peak.index},
-        {"value", 10.0f * log10(peak.value)}};
-}
-
-
 static void to_json(nlohmann::json& j, const MuxJson& mux) {
     j = nlohmann::json{
         {"receiver", mux.receiver},
         {"ensemble", mux.ensemble},
         {"services", mux.services},
         {"utctime", mux.utctime},
-        {"messages", mux.messages},
-        {"tii", mux.tii},
-        {"cir_peaks", mux.cir_peaks}
     };
 
     j["demodulator"]["fic"]["numcrcerrors"] = mux.demodulator_fic_numcrcerrors;

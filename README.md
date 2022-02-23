@@ -111,10 +111,6 @@ Receive using RTLSDR, and tune to programme:
 
     dab_plus_streamer -c channel -p programme
 
-Read an IQ file and tune to programme: (IQ file format is u8, unless the file ends with FORMAT.iq)
-
-    dab_plus_streamer -f file -p programme
-
 Use -D to dump FIC and all programmes to files:
  
     dab_plus_streamer -c channel -D 
@@ -133,8 +129,6 @@ Backend options
 ---
 
 `-u` disable coarse corrector, for receivers who have a low frequency offset.
-
-Use `-t [test_number]` to run a test. To understand what the tests do, please see source code.
 
 Driver options
 ---
@@ -157,9 +151,7 @@ Examples:
 ---
 
     dab_plus_streamer -c 10B -p GRRIF
-    dab_plus_streamer -f ./ofdm.iq -p GRRIF
-    dab_plus_streamer -f ./ofdm.iq -t 1
-
+    
 Profiling
 ---
 If you build with cmake and add `-DPROFILING=ON`, welle-io will generate a few `.csv` files and a graphviz `.dot` file that can be used

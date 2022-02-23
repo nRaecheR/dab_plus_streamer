@@ -140,9 +140,6 @@ struct MuxJson {
     double demodulator_snr = 0.0;
     double demodulator_frequencycorrection = 0.0;
     std::chrono::system_clock::time_point demodulator_timelastfct0frame;
-
-    std::list<tii_measurement_t> tii;
-    std::vector<PeakJson> cir_peaks;
 };
 
 std::string build_mux_json(const MuxJson& mux);

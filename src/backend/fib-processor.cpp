@@ -1263,10 +1263,10 @@ void FIBProcessor::dropService(uint32_t SId)
 void FIBProcessor::clearEnsemble()
 {
     std::lock_guard<std::mutex> lock(mutex);
-    components.clear();
+    // components.clear();
     subChannels.resize(64);
-    services.clear();
-    serviceRepeatCount.clear();
+    // services.clear();
+    // serviceRepeatCount.clear();
     timeLastServiceDecrement = std::chrono::steady_clock::now();
     timeLastFCT0Frame = std::chrono::system_clock::now();
 }
