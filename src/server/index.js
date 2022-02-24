@@ -128,6 +128,7 @@ function ensembleInfoTemplate() {
     html += '<tr><th>FIG1 Label (Short label)<br>FIG2 Label</th> ';
     html += '<th><abbr title="Service ID">SId</abbr></th> ';
     html += '<th><abbr title="Service Channel">Channel</abbr></th> ';
+    html += '<th><abbr title="Service Frequency">Frequency</abbr></th> ';
     html += '<th>Bitrate</th> <th><abbr title="Start CU Address, used CUs">CU info</abbr></th> ';
     html += '<th><abbr title="Protection level">Prot.Lev.</abbr></th>';
     html += '<th><abbr title="Transmission Mode, rate, channels">Technical details</abbr></th>';
@@ -140,7 +141,7 @@ function ensembleInfoTemplate() {
 }
 
 function serviceTemplate() {
-    var html = '<tr><td>${label} (${shortlabel})<br>${fig2label}</td> <td>${SId}</td> <td>${channel}</td> <td>${bitrate}&nbsp;kbps</td> <td>${sad_cu}</td> <td>${protection}</td>';
+    var html = '<tr><td>${label} (${shortlabel})<br>${fig2label}</td> <td>${SId}</td> <td>${channel}</td> <td>${frequency}</td> <td>${bitrate}&nbsp;kbps</td> <td>${sad_cu}</td> <td>${protection}</td>';
     html += '<td>${techdetails}</td>';
     html += '<td>${pty}</td> <td>${language}<br>${subchannel_language}</td> <td></i>${dls}</i></td>';
     html += '<td>${errorcounters}</td>';
@@ -265,6 +266,7 @@ function populateEnsembleinfo() {
             s["shortlabel"] = service.label.shortlabel;
             s["SId"] = service.sid;
             s["channel"] = service.channel;
+            s["frequency"] = service.frequency;
             s["buttondisabled"] = "disabled";
             s["buttonclass"] = "disabled";
             if (service.components) {

@@ -44,7 +44,7 @@ class FicHandler: public Viterbi
         void    clearEnsemble();
         int     getFicDecodeRatioPercent();
 
-        void    setChannel(std::string ch);
+        void    setChannelInfo(struct channel_info ch);
 
         FIBProcessor fibProcessor;
 

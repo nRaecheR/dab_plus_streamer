@@ -49,11 +49,6 @@
 class CVirtualInput; // from input/virtual_input.h
 class RadioReceiver; // from backend/radio_receiver.h
 
-struct channel_info {
-    std::string name;
-    int frequency;
-};
-
 class WebRadioInterface : public RadioControllerInterface {
     public:
         enum class DecodeStrategy {

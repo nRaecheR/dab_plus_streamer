@@ -117,12 +117,17 @@ struct DabLabel {
     std::string utf8_label() const;
 };
 
+struct channel_info {
+    std::string name;
+    int frequency;
+};
+
 struct Service {
     Service(uint32_t sid) : serviceId(sid) {}
 
     uint32_t serviceId = 0;
 
-    std::string channel;
+    struct channel_info channel;
 
     DabLabel serviceLabel;
     int16_t  language = 0;

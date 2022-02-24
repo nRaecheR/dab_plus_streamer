@@ -143,9 +143,9 @@ bool RadioReceiver::removeServiceToDecode(const Service& s)
     return false;
 }
 
-void RadioReceiver::setChannel(std::string channel)
+void RadioReceiver::setChannelInfo(struct channel_info channel)
 {
-    ficHandler.setChannel(channel);
+    ficHandler.setChannelInfo(channel);
 }
 
 bool RadioReceiver::playProgramme(ProgrammeHandlerInterface& handler,

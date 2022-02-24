@@ -72,6 +72,7 @@ struct ComponentJson {
 struct ServiceJson {
     std::string sid;
     std::string channel;
+    int frequency;
     int16_t programType = 0;
     std::string ptystring;
     int16_t language = 0;

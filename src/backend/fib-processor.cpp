@@ -1339,7 +1339,7 @@ std::chrono::system_clock::time_point FIBProcessor::getTimeLastFCT0Frame() const
     return timeLastFCT0Frame;
 }
 
-void FIBProcessor::setChannel(std::string ch)
+void FIBProcessor::setChannelInfo(struct channel_info ch)
 {
     channel=ch;
 }

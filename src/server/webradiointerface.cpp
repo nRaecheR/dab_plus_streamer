@@ -268,7 +268,12 @@ void WebRadioInterface::retune(const std::string& channel)
         }
         tiis.clear();
 
-        rx->setChannel(channel);
+        struct channel_info info;
+
+        info.name = channel;
+        info.frequency = freq;
+
+        rx->setChannelInfo(info);
         cerr << "RETUNE Set frequency" << endl;
         input.setFrequency(freq);
         input.reset(); // Clear buffer
@@ -333,7 +338,7 @@ void WebRadioInterface::scan(std::list<struct channel_info>& channel_infos){
                 tiis.clear();
 
                 cerr << "SCAN setChannel" << endl;
-                rx->setChannel(info.name);
+                rx->setChannelInfo(info);
                 cerr << "SCAN Set frequency for channel " << info.name << endl;
                 input.setFrequency(info.frequency);
 
@@ -641,7 +646,8 @@ bool WebRadioInterface::send_mux_json(Socket& s)
         for (const auto& s : rx->getServiceList()) {
             ServiceJson service;
             service.sid = to_hex(s.serviceId, 4);
-            service.channel = s.channel;
+            service.channel = s.channel.name;
+            service.frequency = s.channel.frequency;
             service.programType = s.programType;
             service.ptystring = DABConstants::getProgramTypeName(s.programType);
             service.language = s.language;
