@@ -544,7 +544,17 @@ bool WebRadioInterface::dispatch_client(Socket&& client)
                 const regex regex_mp3(R"(^[/]mp3[/]([^ ]+))");
                 std::smatch match_mp3;
                 if (regex_search(req.url, match_mp3, regex_mp3)) {
-                    success = send_mp3(s, match_mp3[1]);
+
+                    std::stringstream channel_path (match_mp3[1]);
+                    std::string ch, sid;
+
+                    std::getline(channel_path, ch , '/');
+                    std::getline(channel_path, sid , '/');
+
+                    cout << "WEB: Requested channel=" << ch << ", sid=" << sid << endl;
+
+                    if(!ch.empty() && !sid.empty())
+                        success = send_mp3(s, ch, sid);
                 }
                 else if (regex_search(req.url, match_slide, regex_slide)) {
                     success = send_slide(s, match_slide[1]);
@@ -674,7 +684,7 @@ bool WebRadioInterface::send_mux_json(Socket& s)
                                      "unknown")});
                         if (sc.audioType() == AudioServiceComponentType::DAB or
                             sc.audioType() == AudioServiceComponentType::DABPlus) {
-                            string urlmp3 = "/mp3/" + to_hex(s.serviceId, 4);
+                            string urlmp3 = "/mp3/" + s.channel.name + "/" + to_hex(s.serviceId, 4);
                             service.url_mp3 = serverUrl + urlmp3;
                         }
 
@@ -795,7 +805,7 @@ bool WebRadioInterface::send_mux_playlist(Socket& s)
                     case TransportMode::Audio:
                         if (servicecomponent.audioType() == AudioServiceComponentType::DAB or
                             servicecomponent.audioType() == AudioServiceComponentType::DABPlus) {
-                            url_mp3 = "/mp3/" + hex_sid;
+                            url_mp3 = "/mp3/" + service.channel.name + "/" + hex_sid;
                         }
                         break;
                     default:
@@ -823,7 +833,7 @@ bool WebRadioInterface::send_mux_playlist(Socket& s)
     return true;
 }
 
-bool WebRadioInterface::send_mp3(Socket& s, const std::string& stream)
+bool WebRadioInterface::send_mp3(Socket& s, const std::string& channel, const std::string& stream)
 {
     unique_lock<mutex> lock(rx_mut);
     ASSERT_RX;

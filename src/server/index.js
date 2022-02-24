@@ -146,7 +146,7 @@ function serviceTemplate() {
     html += '<td>${pty}</td> <td>${language}<br>${subchannel_language}</td> <td></i>${dls}</i></td>';
     html += '<td>${errorcounters}</td>';
     html += '<td><canvas id="${canvasid}" width="64" height="12"></canvas></td>';
-    html += '<td><button type=button ${buttondisabled} class="${buttonclass}" onclick="setPlayerSource(${SId})">Play</button></td>';
+    html += '<td><button type=button ${buttondisabled} class="${buttonclass}" onclick="setPlayerSource(${channel},${SId})">Play</button></td>';
     html += '</tr>';
     return html;
 }
@@ -162,8 +162,8 @@ function playerLoad() {
     document.getElementById("player").play();
 }
 
-function setPlayerSource(sid) {
-    document.getElementById("player").src = "/mp3/" + sid;
+function setPlayerSource(channel,sid) {
+    document.getElementById("player").src = "/mp3/" + channel + "/" + sid;
     playerLoad();
 }
 
