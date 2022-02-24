@@ -45,6 +45,7 @@ class FicHandler: public Viterbi
         int     getFicDecodeRatioPercent();
 
         void    setChannelInfo(struct channel_info ch);
+        struct channel_info getChannelInfo();
 
         FIBProcessor fibProcessor;
 

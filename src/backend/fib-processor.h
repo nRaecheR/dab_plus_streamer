@@ -55,6 +55,7 @@ class FIBProcessor {
         std::chrono::system_clock::time_point getTimeLastFCT0Frame() const;
 
         void setChannelInfo(struct channel_info channel);
+        struct channel_info getChannelInfo();
 
     private:
         RadioControllerInterface& myRadioInterface;

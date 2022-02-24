@@ -148,6 +148,11 @@ void RadioReceiver::setChannelInfo(struct channel_info channel)
     ficHandler.setChannelInfo(channel);
 }
 
+struct channel_info RadioReceiver::getChannelInfo()
+{
+    return ficHandler.getChannelInfo();
+}
+
 bool RadioReceiver::playProgramme(ProgrammeHandlerInterface& handler,
         const Service& s, const std::string& dumpFileName, bool unique)
 {

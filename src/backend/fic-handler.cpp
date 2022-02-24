@@ -244,3 +244,7 @@ void FicHandler::setChannelInfo(struct channel_info ch)
     fibProcessor.setChannelInfo(ch);
 }
 
+struct channel_info FicHandler::getChannelInfo()
+{
+    return fibProcessor.getChannelInfo();
+}

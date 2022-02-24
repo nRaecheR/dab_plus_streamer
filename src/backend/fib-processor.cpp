@@ -1343,3 +1343,8 @@ void FIBProcessor::setChannelInfo(struct channel_info ch)
 {
     channel=ch;
 }
+
+struct channel_info FIBProcessor::getChannelInfo()
+{
+    return channel;
+}

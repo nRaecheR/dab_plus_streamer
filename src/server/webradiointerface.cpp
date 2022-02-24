@@ -835,13 +835,27 @@ bool WebRadioInterface::send_mux_playlist(Socket& s)
 
 bool WebRadioInterface::send_mp3(Socket& s, const std::string& channel, const std::string& stream)
 {
+    {
+        unique_lock<mutex> lock(rx_mut);
+        ASSERT_RX;
+
+        auto info = rx->getChannelInfo();
+
+        if(info.name != channel)
+        {
+            lock.unlock();
+            retune(channel);
+        }
+    }
+
     unique_lock<mutex> lock(rx_mut);
     ASSERT_RX;
 
     for (const auto& service : rx->getServiceList()) {
         if (rx->serviceHasAudioComponent(service) and
                 (to_hex(service.serviceId, 4) == stream or
-                (uint32_t)std::stoul(stream) == service.serviceId)) {
+                (uint32_t)std::stoul(stream) == service.serviceId) and
+                service.channel.name == channel) {
             try {
                 auto& ph = phs.at(service.serviceId);
 
@@ -868,7 +882,6 @@ bool WebRadioInterface::send_mp3(Socket& s, const std::string& channel, const st
             catch (const out_of_range& e) {
                 cerr << "Could not setup mp3 sender for " <<
                     service.serviceId << ": " << e.what() << endl;
-
                 send_http_response(s, http_503, e.what());
                 return false;
             }
