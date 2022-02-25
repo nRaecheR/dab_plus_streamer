@@ -354,7 +354,7 @@ void WebRadioInterface::scan(std::list<struct channel_info>& channel_infos){
             running = true;
             programme_handler_thread = thread(&WebRadioInterface::handle_phs, this);
 
-            this_thread::sleep_for(chrono::seconds(5));
+            this_thread::sleep_for(chrono::seconds(10));
         }
     }
 }
