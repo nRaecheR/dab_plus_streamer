@@ -357,6 +357,22 @@ void WebRadioInterface::scan(std::list<struct channel_info>& channel_infos){
             this_thread::sleep_for(chrono::seconds(10));
         }
     }
+
+    // Stop receiver until streaming web request
+    unique_lock<mutex> lock(rx_mut);
+
+    rx->stop();
+
+    // Invalidate current channel info to force retune
+    struct channel_info invalid_info;
+    invalid_info.name = "XX";
+    invalid_info.frequency = 0;
+
+    tiis.clear();
+
+    rx->setChannelInfo(invalid_info);
+
+    cerr << "SCAN Complete" << endl;
 }
 
 static string recv_line(Socket& s) {
