@@ -845,6 +845,8 @@ bool WebRadioInterface::send_mp3(Socket& s, const std::string& channel, const st
         {
             lock.unlock();
             retune(channel);
+
+            this_thread::sleep_for(chrono::seconds(10));
         }
     }
 
