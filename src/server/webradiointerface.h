@@ -131,7 +131,8 @@ class WebRadioInterface : public RadioControllerInterface {
         bool handle_channel_post(Socket& s, const std::string& request);
 
         void handle_phs();
-        void check_decoders_required();
+        bool check_decoders_required();
+        void PauseDecoding();
         std::list<tii_measurement_t> getTiiStats();
 
         std::thread programme_handler_thread;

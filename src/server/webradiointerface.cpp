@@ -171,7 +171,7 @@ WebRadioInterface::~WebRadioInterface()
 
 class TuneFailed {};
 
-void WebRadioInterface::check_decoders_required()
+bool WebRadioInterface::check_decoders_required()
 {
     lock_guard<mutex> lock(rx_mut);
     ASSERT_RX;
@@ -222,6 +222,16 @@ void WebRadioInterface::check_decoders_required()
         programmes_being_decoded.clear();
     }
     phs_changed.notify_all();
+
+    // Check if there is still a programme that needs to be decoded
+    for (auto const& prog : programmes_being_decoded)
+    {
+            if(prog.second == true)
+                return true; // Yes, programme found
+    }
+
+    // No, no more programmes that need to be decoded.
+    return false;
 }
 
 void WebRadioInterface::retune(const std::string& channel)
@@ -293,6 +303,24 @@ void WebRadioInterface::retune(const std::string& channel)
     }
 }
 
+void WebRadioInterface::PauseDecoding(){
+    // Stop receiver until streaming web request
+    unique_lock<mutex> lock(rx_mut);
+
+    rx->stop();
+
+    // Invalidate current channel info to force retune
+    struct channel_info invalid_info;
+    invalid_info.name = "XX";
+    invalid_info.frequency = 0;
+
+    tiis.clear();
+
+    rx->setChannelInfo(invalid_info);
+
+    cerr << "PAUSE Decoding suspended" << endl;
+}
+
 void WebRadioInterface::scan(std::list<struct channel_info>& channel_infos){
 
     cerr << "SCAN: Begin scanning channels" << endl;
@@ -358,19 +386,8 @@ void WebRadioInterface::scan(std::list<struct channel_info>& channel_infos){
         }
     }
 
-    // Stop receiver until streaming web request
-    unique_lock<mutex> lock(rx_mut);
-
-    rx->stop();
-
-    // Invalidate current channel info to force retune
-    struct channel_info invalid_info;
-    invalid_info.name = "XX";
-    invalid_info.frequency = 0;
-
-    tiis.clear();
-
-    rx->setChannelInfo(invalid_info);
+    // Pause deconding until a web client connects
+    this->PauseDecoding();
 
     cerr << "SCAN Complete" << endl;
 }
@@ -893,7 +910,11 @@ bool WebRadioInterface::send_mp3(Socket& s, const std::string& channel, const st
 
                 cerr << "Removing mp3 sender" << endl;
                 ph.removeSender(&sender);
-                check_decoders_required();
+                if(false == check_decoders_required())
+                {
+                    cerr << "SEND_MP3 No more clients, pause decoding." << endl;
+                    this->PauseDecoding();
+                }
 
                 return true;
             }
