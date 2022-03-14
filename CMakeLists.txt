@@ -205,7 +205,7 @@ add_custom_command(
 				${CMAKE_CURRENT_BINARY_DIR}/index.js)
 
 	INSTALL (TARGETS ${ExecutableName} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-	INSTALL (FILES src/server/doc/man/dab-plus-streamer.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1/)
+	INSTALL (FILES src/server/doc/man/dab_plus_streamer.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1/)
 	INSTALL (
 		FILES
 			${PROJECT_SOURCE_DIR}/src/server/index.html
