@@ -912,8 +912,7 @@ bool WebRadioInterface::send_mp3(Socket& s, const std::string& channel, const st
                 ph.removeSender(&sender);
                 if(false == check_decoders_required())
                 {
-                    cerr << "SEND_MP3 No more clients, pause decoding." << endl;
-                    this->PauseDecoding();
+                    cerr << "SEND_MP3 No more MP3 clients." << endl;
                 }
 
                 return true;
@@ -1195,6 +1194,8 @@ void WebRadioInterface::serve()
         running_connections.push_back(async(launch::async,
                     &WebRadioInterface::dispatch_client, this, move(client)));
 
+        //cerr << "SERVE: New connection accepted. Number of connections: " << running_connections.size() << endl;
+
         deque<future<bool> > still_running_connections;
         for (auto& fut : running_connections) {
             if (fut.valid()) {
@@ -1209,10 +1210,13 @@ void WebRadioInterface::serve()
                 }
             }
         }
+
+        //cerr << "SERVE: Number of connections: " << still_running_connections.size() << endl;
+
         running_connections = move(still_running_connections);
     }
 
-    cerr << "SERVE No more connections running" << endl;
+    cout << "SERVE No more connections running" << endl;
 
     running = false;
     if (programme_handler_thread.joinable()) {
@@ -1241,6 +1245,8 @@ void WebRadioInterface::serve()
     cerr << "SERVE clear remaining data structures" << endl;
     phs.clear();
     programmes_being_decoded.clear();
+
+    this->PauseDecoding();
 }
 
 void WebRadioInterface::onSNR(float snr)
